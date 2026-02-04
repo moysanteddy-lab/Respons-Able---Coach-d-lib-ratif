@@ -607,6 +607,21 @@ html, body {
   font-style: italic;
 }
 
+/* ---- Message timestamps ---- */
+.msg-time {
+  font-size: 10px;
+  color: var(--text-secondary);
+  opacity: 0.5;
+  align-self: flex-end;
+  padding: 0 4px;
+  flex-shrink: 0;
+  transition: opacity 0.2s;
+}
+
+.message:hover .msg-time {
+  opacity: 1;
+}
+
 /* ---- System messages ---- */
 .message-system {
   align-self: center;

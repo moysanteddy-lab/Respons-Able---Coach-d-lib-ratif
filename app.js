@@ -645,9 +645,21 @@ function scrollPhaseIntoView(phaseId) {
   }
 }
 
+const PHASE_PLACEHOLDERS = {
+  1: "Dis-moi ce qui te préoccupe...",
+  2: "Qu'est-ce que ça te fait ressentir ?",
+  3: "Essaie de résumer ta position...",
+  4: "Comment tu le dirais aux autres ?",
+  5: "Défends ta position..."
+};
+
 function updatePhaseInfo() {
   const phase = PHASES.find(p => p.id === state.currentPhase);
   document.getElementById('phase-info-text').textContent = phase.description;
+  const input = document.getElementById('input');
+  if (input && !isRecording) {
+    input.placeholder = PHASE_PLACEHOLDERS[state.currentPhase] || 'Écris ton message...';
+  }
 }
 
 function switchPhase(phaseId) {
@@ -669,11 +681,16 @@ function switchPhase(phaseId) {
 
 // ----- Messages -----
 
+function getTimeString() {
+  const now = new Date();
+  return now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+}
+
 function addCoachMessage(text) {
   const chat = document.getElementById('chat');
   const div = document.createElement('div');
   div.className = 'message message-coach';
-  div.innerHTML = `<div class="bubble">${formatText(text)}</div>`;
+  div.innerHTML = `<div class="bubble">${formatText(text)}</div><span class="msg-time">${getTimeString()}</span>`;
   chat.appendChild(div);
   scrollToBottom();
 }
@@ -682,7 +699,7 @@ function addUserMessage(text) {
   const chat = document.getElementById('chat');
   const div = document.createElement('div');
   div.className = 'message message-user';
-  div.innerHTML = `<div class="bubble">${formatText(text)}</div>`;
+  div.innerHTML = `<span class="msg-time">${getTimeString()}</span><div class="bubble">${formatText(text)}</div>`;
   chat.appendChild(div);
   scrollToBottom();
 }
@@ -1029,6 +1046,11 @@ function renderToolbox() {
 function toggleCard(index) {
   const card = document.getElementById('card-' + index);
   card.classList.toggle('open');
+  if (card.classList.contains('open')) {
+    setTimeout(() => {
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 50);
+  }
 }
 
 // ----- Event listeners -----
@@ -1079,6 +1101,22 @@ function setupEventListeners() {
     if (confirm('Commencer une nouvelle session ? La conversation actuelle sera effacée.')) {
       closeMenu();
       clearSession();
+    }
+  });
+
+  // Escape pour fermer modal/menu
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      hidePhaseInfo();
+      closeMenu();
+    }
+  });
+
+  // Confirmation avant fermeture d'onglet
+  window.addEventListener('beforeunload', (e) => {
+    if (state.chatHistory.length > 2) {
+      e.preventDefault();
+      e.returnValue = '';
     }
   });
 }
