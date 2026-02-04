@@ -1,12 +1,10 @@
 // ============================================
 // Coach Civique — Respons'Able
 // ============================================
-// Réutilise le même Cloudflare Worker que RespirAction
-// (proxy Groq avec Llama 3.3 70B)
 
 const WORKER_URL = 'https://black-cell-5b71ted.moysan-teddy.workers.dev';
 
-// ----- System prompt de base (partagé entre toutes les phases) -----
+// ----- System prompt de base -----
 
 const BASE_PROMPT = `Tu es un coach civique créé par Respons'Able. Tu aides les citoyens à préparer leur participation à des délibérations citoyennes (conventions citoyennes, budgets participatifs, assemblées citoyennes, etc.).
 
@@ -21,7 +19,7 @@ PRINCIPES FONDAMENTAUX :
 
 `;
 
-// ----- Définition des 5 phases -----
+// ----- Phases -----
 
 const PHASES = [
   {
@@ -118,7 +116,7 @@ RÈGLES DE LA SIMULATION :
   }
 ];
 
-// ----- Infos détaillées par phase (pour la bulle "i") -----
+// ----- Infos phases (bulle "i") -----
 
 const PHASE_INFO = {
   1: {
@@ -153,16 +151,142 @@ const PHASE_INFO = {
   }
 };
 
-// ----- État de l'application -----
+// ----- Formes de mobilisation citoyenne (Boîte à outils) -----
+
+const MOBILISATION_FORMS = [
+  {
+    name: 'Pétition',
+    description: 'Recueil de signatures pour interpeller les pouvoirs publics sur un sujet. Peut être lancée en ligne ou en physique.',
+    advantages: [
+      'Accessible à tous, faible barrière à l\'entrée',
+      'Mesurable : le nombre de signatures crée une pression',
+      'Peut déclencher un débat médiatique'
+    ],
+    limits: [
+      'Facilement ignorée si pas relayée massivement',
+      'Risque de "slacktivisme" (signer sans s\'engager plus)',
+      'Aucune obligation légale de réponse'
+    ],
+    example: 'L\'Affaire du Siècle (France, 2018) — 2,3 millions de signatures pour action climatique. A mené au premier procès contre l\'État français pour inaction climatique, que l\'État a perdu.'
+  },
+  {
+    name: 'Manifestation',
+    description: 'Mobilisation physique dans l\'espace public pour rendre visible une cause et exercer une pression collective.',
+    advantages: [
+      'Forte visibilité médiatique',
+      'Crée un sentiment de puissance collective',
+      'Pression directe sur les décideurs'
+    ],
+    limits: [
+      'Impact souvent éphémère sans suite organisée',
+      'Risque de récupération politique ou de débordements',
+      'Peut braquer l\'opinion publique si mal perçue'
+    ],
+    example: 'Marches pour le climat (2018-2019) — Des millions de personnes dans 150 pays. Portées par la jeunesse, elles ont accéléré l\'inscription du climat dans l\'agenda politique mondial.'
+  },
+  {
+    name: 'Budget participatif',
+    description: 'Les citoyens proposent et votent directement pour des projets financés par une partie du budget public de leur collectivité.',
+    advantages: [
+      'Pouvoir décisionnel réel : les projets votés sont réalisés',
+      'Résultats concrets et visibles dans le quotidien',
+      'Éducation citoyenne sur la gestion des fonds publics'
+    ],
+    limits: [
+      'Souvent limité à un petit pourcentage du budget total',
+      'Tendance à favoriser les projets visibles (bancs, parcs) au détriment du structurel',
+      'Participation parfois faible et peu représentative'
+    ],
+    example: 'Porto Alegre (Brésil, 1989) — Premier budget participatif au monde. En 10 ans, l\'accès à l\'eau potable est passé de 75% à 98% de la population grâce aux priorités définies par les citoyens.'
+  },
+  {
+    name: 'Convention citoyenne',
+    description: 'Panel de citoyens tirés au sort qui délibèrent en profondeur sur un sujet complexe, avec l\'aide d\'experts, et formulent des propositions.',
+    advantages: [
+      'Représentativité par tirage au sort (diversité sociale)',
+      'Délibération approfondie sur plusieurs mois',
+      'Forte légitimité démocratique des propositions'
+    ],
+    limits: [
+      'Coûteux et long à organiser',
+      'Pas toujours suivi d\'effets concrets',
+      'Les participants ne représentent qu\'un petit échantillon'
+    ],
+    example: 'Convention Citoyenne pour le Climat (France, 2019-2020) — 150 citoyens tirés au sort, 149 propositions. Malgré une mise en oeuvre partielle, elle a démontré la capacité des citoyens ordinaires à traiter des sujets complexes.'
+  },
+  {
+    name: 'Conseil de quartier',
+    description: 'Instance locale de démocratie de proximité où les habitants échangent avec les élus sur les sujets qui concernent leur quartier.',
+    advantages: [
+      'Ancrage local : traite des problèmes concrets du quotidien',
+      'Régularité des rencontres (lien durable avec les élus)',
+      'Ouvert à tous sans condition'
+    ],
+    limits: [
+      'Souvent consultatif seulement (pas de pouvoir décisionnel)',
+      'Participation souvent faible et vieillissante',
+      'Risque de noyautage par des habitués'
+    ],
+    example: 'Conseils de quartier parisiens (loi Vaillant, 2002) — Obligatoires dans les villes de +80 000 habitants. Résultats variables : très actifs dans certaines villes, purement formels dans d\'autres.'
+  },
+  {
+    name: 'Association / Collectif citoyen',
+    description: 'Groupe structuré de citoyens organisés autour d\'une cause, avec un cadre juridique (loi 1901) ou informel.',
+    advantages: [
+      'Action durable et structurée dans le temps',
+      'Cadre juridique qui permet de recevoir des fonds, agir en justice',
+      'Capacité d\'expertise et de plaidoyer'
+    ],
+    limits: [
+      'Dépendance au bénévolat (risque d\'essoufflement)',
+      'Complexité administrative',
+      'Peut se professionnaliser et perdre son ancrage citoyen'
+    ],
+    example: 'ATD Quart Monde (1957) — Pionnière de la participation des personnes en précarité aux décisions publiques. A contribué à la loi contre l\'exclusion de 1998 et à la création du RSA.'
+  },
+  {
+    name: 'Référendum local',
+    description: 'Vote direct des citoyens sur une question locale. Le résultat peut être consultatif ou décisionnel selon le cadre.',
+    advantages: [
+      'Décision directe et démocratiquement légitime',
+      'Forte mobilisation et intérêt citoyen',
+      'Tranche les débats de manière claire'
+    ],
+    limits: [
+      'Question binaire oui/non : simplifie des enjeux complexes',
+      'Conditions de validité strictes (seuils de participation)',
+      'Peut être instrumentalisé politiquement'
+    ],
+    example: 'Référendum de Notre-Dame-des-Landes (2016) — 55% pour la construction de l\'aéroport, mais le projet a finalement été abandonné en 2018 face à la mobilisation continue sur le terrain.'
+  },
+  {
+    name: 'Initiative citoyenne',
+    description: 'Mécanisme par lequel les citoyens peuvent proposer directement une loi, un référendum ou mettre un sujet à l\'agenda politique.',
+    advantages: [
+      'Pouvoir d\'initiative directe du peuple',
+      'Contourne l\'inertie des représentants',
+      'Force le débat public sur un sujet ignoré'
+    ],
+    limits: [
+      'Seuils de signatures souvent très élevés',
+      'Processus long et complexe',
+      'Peut être instrumentalisée par des lobbys'
+    ],
+    example: 'Initiative citoyenne européenne "Right2Water" (2013) — Première ICE à atteindre le million de signatures requis (1,8M au total). A mené à une directive européenne garantissant l\'accès à l\'eau potable.'
+  }
+];
+
+// ----- État -----
 
 const state = {
   currentPhase: 1,
   visitedPhases: new Set([1]),
   chatHistory: [],
-  loading: false
+  loading: false,
+  currentView: 'coach'
 };
 
-// ----- Reconnaissance vocale (corrigée pour mobile) -----
+// ----- Reconnaissance vocale -----
 
 let speechRecognition = null;
 let isRecording = false;
@@ -177,10 +301,6 @@ function toggleVoice() {
     return;
   }
 
-  const micBtn = document.getElementById('mic-btn');
-  const input = document.getElementById('input');
-
-  // Si déjà en cours, on stoppe proprement
   if (isRecording) {
     isRecording = false;
     clearTimeout(silenceTimer);
@@ -188,10 +308,10 @@ function toggleVoice() {
     return;
   }
 
-  // Nouvelle session : reset complet
   voiceTranscript = '';
   isRecording = true;
-  micBtn.classList.add('recording');
+  document.getElementById('mic-btn').classList.add('recording');
+  const input = document.getElementById('input');
   input.placeholder = "Je t'écoute... (4s de silence = envoi)";
   input.value = '';
 
@@ -210,9 +330,7 @@ function startRecognition() {
 
   speechRecognition.onresult = (event) => {
     clearTimeout(silenceTimer);
-
     let interim = '';
-
     for (let i = 0; i < event.results.length; i++) {
       if (event.results[i].isFinal) {
         voiceTranscript += event.results[i][0].transcript + ' ';
@@ -220,10 +338,8 @@ function startRecognition() {
         interim += event.results[i][0].transcript;
       }
     }
-
     input.value = voiceTranscript + interim;
 
-    // 4s sans parole = envoi automatique
     silenceTimer = setTimeout(() => {
       if (input.value.trim()) {
         isRecording = false;
@@ -236,7 +352,6 @@ function startRecognition() {
   speechRecognition.onerror = (event) => {
     console.error('Speech error:', event.error);
     if (event.error === 'no-speech' && isRecording) {
-      // Pas de parole détectée, on relance
       try { startRecognition(); } catch (e) {}
       return;
     }
@@ -251,10 +366,7 @@ function startRecognition() {
 
   speechRecognition.onend = () => {
     if (isRecording) {
-      // Toujours en enregistrement : relancer pour la phrase suivante
-      try {
-        startRecognition();
-      } catch (e) {
+      try { startRecognition(); } catch (e) {
         isRecording = false;
         micBtn.classList.remove('recording');
         input.placeholder = 'Écris ton message...';
@@ -266,28 +378,64 @@ function startRecognition() {
     }
   };
 
-  try {
-    speechRecognition.start();
-  } catch (e) {
+  try { speechRecognition.start(); } catch (e) {
     isRecording = false;
     micBtn.classList.remove('recording');
   }
 }
 
-// ----- Initialisation -----
+// ----- Init -----
 
 function init() {
   renderPhases();
+  renderToolbox();
   updatePhaseInfo();
   setupEventListeners();
 
-  // Message de bienvenue phase 1
   const phase = PHASES[0];
   addCoachMessage(phase.welcome);
   state.chatHistory.push({ role: 'assistant', content: phase.welcome });
 }
 
-// ----- Rendu de la barre de phases -----
+// ----- Navigation entre vues -----
+
+function switchView(viewId) {
+  state.currentView = viewId;
+
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + viewId).classList.add('active');
+
+  document.querySelectorAll('.menu-item[data-view]').forEach(item => {
+    item.classList.toggle('active', item.dataset.view === viewId);
+  });
+
+  const title = document.getElementById('view-title');
+  const subtitle = document.getElementById('view-subtitle');
+
+  if (viewId === 'coach') {
+    title.textContent = 'Coach Civique';
+    subtitle.textContent = 'Prépare ta voix pour la délibération';
+  } else if (viewId === 'toolbox') {
+    title.textContent = 'Boîte à outils';
+    subtitle.textContent = 'Formes de mobilisation citoyenne';
+  }
+
+  closeMenu();
+}
+
+// ----- Menu latéral -----
+
+function openMenu() {
+  document.getElementById('side-menu').classList.add('open');
+  document.getElementById('menu-overlay').classList.add('visible');
+}
+
+function closeMenu() {
+  document.getElementById('side-menu').classList.remove('open');
+  document.getElementById('menu-overlay').classList.remove('visible');
+}
+
+// ----- Phases -----
 
 function renderPhases() {
   const nav = document.getElementById('phases-nav');
@@ -297,21 +445,15 @@ function renderPhases() {
       ${p.name}
     </button>
   `).join('');
-
-  const synthBtn = `<button class="synth-btn" id="synth-btn">Ma synthèse</button>`;
-
-  nav.innerHTML = phaseBtns + synthBtn;
+  nav.innerHTML = phaseBtns + `<button class="synth-btn" id="synth-btn">Ma synthèse</button>`;
 }
 
 function updatePhaseButtons() {
   document.querySelectorAll('.phase-btn').forEach(btn => {
     const id = parseInt(btn.dataset.phase);
     btn.classList.remove('active', 'visited');
-    if (id === state.currentPhase) {
-      btn.classList.add('active');
-    } else if (state.visitedPhases.has(id)) {
-      btn.classList.add('visited');
-    }
+    if (id === state.currentPhase) btn.classList.add('active');
+    else if (state.visitedPhases.has(id)) btn.classList.add('visited');
   });
 }
 
@@ -320,30 +462,20 @@ function updatePhaseInfo() {
   document.getElementById('phase-info-text').textContent = phase.description;
 }
 
-// ----- Changement de phase -----
-
 function switchPhase(phaseId) {
   if (phaseId === state.currentPhase || state.loading) return;
-
   state.currentPhase = phaseId;
   state.visitedPhases.add(phaseId);
-
   const phase = PHASES.find(p => p.id === phaseId);
-
-  // Séparateur visuel dans le chat
   addSystemMessage(`Phase ${phase.id} — ${phase.name}`);
-
-  // Message de bienvenue du coach (ajouté à l'historique pour le contexte)
   addCoachMessage(phase.welcome);
   state.chatHistory.push({ role: 'assistant', content: phase.welcome });
-
-  // Mise à jour UI
   updatePhaseButtons();
   updatePhaseInfo();
   scrollToBottom();
 }
 
-// ----- Gestion des messages -----
+// ----- Messages -----
 
 function addCoachMessage(text) {
   const chat = document.getElementById('chat');
@@ -368,6 +500,19 @@ function addSystemMessage(text) {
   const div = document.createElement('div');
   div.className = 'message-system';
   div.textContent = text;
+  chat.appendChild(div);
+  scrollToBottom();
+}
+
+function addActionButton(text, onClick) {
+  const chat = document.getElementById('chat');
+  const div = document.createElement('div');
+  div.className = 'message-action';
+  const btn = document.createElement('button');
+  btn.className = 'action-btn';
+  btn.textContent = text;
+  btn.addEventListener('click', onClick);
+  div.appendChild(btn);
   chat.appendChild(div);
   scrollToBottom();
 }
@@ -401,12 +546,10 @@ function hideTyping() {
 
 function scrollToBottom() {
   const chat = document.getElementById('chat');
-  requestAnimationFrame(() => {
-    chat.scrollTop = chat.scrollHeight;
-  });
+  requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
 }
 
-// ----- Envoi de message à l'API -----
+// ----- Envoi de message -----
 
 async function sendMessage() {
   const input = document.getElementById('input');
@@ -415,7 +558,6 @@ async function sendMessage() {
 
   addUserMessage(text);
   state.chatHistory.push({ role: 'user', content: text });
-
   input.value = '';
   input.style.height = 'auto';
 
@@ -425,10 +567,8 @@ async function sendMessage() {
 
   try {
     const phase = PHASES.find(p => p.id === state.currentPhase);
-    const systemPrompt = BASE_PROMPT + phase.prompt;
-
     const messages = [
-      { role: 'system', content: systemPrompt },
+      { role: 'system', content: BASE_PROMPT + phase.prompt },
       ...state.chatHistory
     ];
 
@@ -439,12 +579,10 @@ async function sendMessage() {
     });
 
     hideTyping();
-
     if (!response.ok) throw new Error(`Erreur ${response.status}`);
 
     const data = await response.json();
     const reply = data.reply || "Hmm, je n'ai pas pu répondre. Réessaie !";
-
     state.chatHistory.push({ role: 'assistant', content: reply });
     addCoachMessage(reply);
 
@@ -464,7 +602,6 @@ async function sendMessage() {
 function showPhaseInfo() {
   const info = PHASE_INFO[state.currentPhase];
   if (!info) return;
-
   document.getElementById('info-modal-title').textContent = info.title;
   document.getElementById('info-modal-body').innerHTML = `
     <div class="modal-field">
@@ -480,7 +617,6 @@ function showPhaseInfo() {
       <div class="modal-value">${info.tip}</div>
     </div>
   `;
-
   document.getElementById('info-modal').classList.add('visible');
 }
 
@@ -488,7 +624,7 @@ function hidePhaseInfo() {
   document.getElementById('info-modal').classList.remove('visible');
 }
 
-// ----- Synthèse de fin de parcours -----
+// ----- Synthèse -----
 
 async function generateSynthesis() {
   if (state.loading) return;
@@ -499,7 +635,6 @@ async function generateSynthesis() {
 
   state.loading = true;
   document.getElementById('send-btn').disabled = true;
-
   addSystemMessage("Génération de ta synthèse...");
   showTyping();
 
@@ -538,13 +673,14 @@ RÈGLES : Sois fidèle à ce que la personne a dit. Ne rajoute rien de ton cru. 
     });
 
     hideTyping();
-
     if (!response.ok) throw new Error(`Erreur ${response.status}`);
 
     const data = await response.json();
     const reply = data.reply || "Impossible de générer la synthèse. Réessaie !";
-
     addCoachMessage(reply);
+
+    // Bouton "Aller plus loin"
+    addActionButton('Aller plus loin → Boîte à outils', () => switchView('toolbox'));
 
   } catch (err) {
     hideTyping();
@@ -556,16 +692,59 @@ RÈGLES : Sois fidèle à ce que la personne a dit. Ne rajoute rien de ton cru. 
   }
 }
 
+// ----- Boîte à outils (rendu) -----
+
+function renderToolbox() {
+  const container = document.getElementById('toolbox-content');
+  const intro = `
+    <div class="toolbox-intro">
+      <h2>Se mobiliser : par où commencer ?</h2>
+      <p>Clarifier ses idées c'est bien. Les porter dans le monde réel, c'est mieux. Voici les principales formes de mobilisation citoyenne, avec leurs forces, leurs limites, et des exemples concrets de ce qu'elles ont produit.</p>
+    </div>
+  `;
+
+  const cards = MOBILISATION_FORMS.map((form, i) => `
+    <div class="toolbox-card" id="card-${i}">
+      <div class="card-header" onclick="toggleCard(${i})">
+        <h3>${form.name}</h3>
+        <span class="card-toggle">+</span>
+      </div>
+      <div class="card-body">
+        <p class="card-description">${form.description}</p>
+        <div class="card-section">
+          <div class="card-section-title">Avantages</div>
+          <ul class="card-advantages">
+            ${form.advantages.map(a => `<li>${a}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="card-section">
+          <div class="card-section-title">Limites</div>
+          <ul class="card-limits">
+            ${form.limits.map(l => `<li>${l}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="card-section">
+          <div class="card-section-title">Exemple historique</div>
+          <div class="card-example">${form.example}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  container.innerHTML = intro + `<div class="toolbox-cards">${cards}</div>`;
+}
+
+function toggleCard(index) {
+  const card = document.getElementById('card-' + index);
+  card.classList.toggle('open');
+}
+
 // ----- Event listeners -----
 
 function setupEventListeners() {
-  // Bouton envoyer
   document.getElementById('send-btn').addEventListener('click', sendMessage);
-
-  // Bouton micro
   document.getElementById('mic-btn').addEventListener('click', toggleVoice);
 
-  // Entrée = envoyer, Shift+Entrée = nouvelle ligne
   document.getElementById('input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -573,30 +752,34 @@ function setupEventListeners() {
     }
   });
 
-  // Auto-resize du textarea
   document.getElementById('input').addEventListener('input', function () {
     this.style.height = 'auto';
     this.style.height = Math.min(this.scrollHeight, 120) + 'px';
   });
 
-  // Clic sur les boutons de phase
+  // Phases + synthèse
   document.getElementById('phases-nav').addEventListener('click', (e) => {
     const phaseBtn = e.target.closest('.phase-btn');
-    if (phaseBtn) {
-      switchPhase(parseInt(phaseBtn.dataset.phase));
-      return;
-    }
+    if (phaseBtn) { switchPhase(parseInt(phaseBtn.dataset.phase)); return; }
     const synthBtn = e.target.closest('.synth-btn');
-    if (synthBtn) {
-      generateSynthesis();
-    }
+    if (synthBtn) generateSynthesis();
   });
 
-  // Bulle info
+  // Info modal
   document.getElementById('info-btn').addEventListener('click', showPhaseInfo);
   document.getElementById('info-modal-close').addEventListener('click', hidePhaseInfo);
   document.getElementById('info-modal').addEventListener('click', (e) => {
     if (e.target === e.currentTarget) hidePhaseInfo();
+  });
+
+  // Menu
+  document.getElementById('hamburger').addEventListener('click', openMenu);
+  document.getElementById('menu-close').addEventListener('click', closeMenu);
+  document.getElementById('menu-overlay').addEventListener('click', closeMenu);
+
+  // Navigation menu
+  document.querySelectorAll('.menu-item[data-view]').forEach(item => {
+    item.addEventListener('click', () => switchView(item.dataset.view));
   });
 }
 
