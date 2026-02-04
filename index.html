@@ -18,7 +18,10 @@
 
     <nav class="phases" id="phases-nav"></nav>
 
-    <div class="phase-info" id="phase-info"></div>
+    <div class="phase-info">
+      <span id="phase-info-text"></span>
+      <button class="info-btn" id="info-btn" aria-label="Plus d'infos">i</button>
+    </div>
 
     <main class="chat" id="chat"></main>
 
@@ -36,6 +39,17 @@
         </svg>
       </button>
     </footer>
+  </div>
+
+  <!-- Modal info phase -->
+  <div class="modal-overlay" id="info-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="info-modal-title"></h3>
+        <button class="modal-close" id="info-modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="info-modal-body"></div>
+    </div>
   </div>
 
   <script src="app.js"></script>

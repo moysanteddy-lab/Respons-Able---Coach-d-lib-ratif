@@ -16,6 +16,7 @@
   --coach-bg: #f1f5f9;
   --user-bg: #1e3a5f;
   --user-text: #ffffff;
+  --accent: #059669;
   --radius: 16px;
   --radius-sm: 10px;
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -145,8 +146,35 @@ html, body {
   color: var(--primary);
 }
 
-/* ---- Phase info ---- */
+/* Synthesis button */
+.synth-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 2px solid var(--accent);
+  border-radius: 24px;
+  background: var(--surface);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  font-family: var(--font);
+}
+
+.synth-btn:hover {
+  background: var(--accent);
+  color: white;
+}
+
+/* ---- Phase info + info button ---- */
 .phase-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   padding: 10px 20px;
   font-size: 13px;
   color: var(--text-secondary);
@@ -154,6 +182,30 @@ html, body {
   background: var(--bg);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+}
+
+.info-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--primary-light);
+  border-radius: 50%;
+  background: none;
+  color: var(--primary-light);
+  font-size: 12px;
+  font-weight: 700;
+  font-style: italic;
+  font-family: Georgia, serif;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.info-btn:hover {
+  background: var(--primary-light);
+  color: white;
 }
 
 /* ---- Chat area ---- */
@@ -326,6 +378,81 @@ html, body {
   50% { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); }
 }
 
+/* ---- Info modal ---- */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-overlay.visible {
+  display: flex;
+}
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius);
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.modal-body {
+  padding: 16px 20px 20px;
+}
+
+.modal-field {
+  margin-bottom: 14px;
+}
+
+.modal-field:last-child {
+  margin-bottom: 0;
+}
+
+.modal-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.modal-value {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
 /* ---- Mobile ---- */
 @media (max-width: 600px) {
   .app-header {
@@ -341,6 +468,11 @@ html, body {
   }
 
   .phase-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .synth-btn {
     padding: 6px 10px;
     font-size: 12px;
   }
