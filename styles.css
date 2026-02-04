@@ -890,6 +890,231 @@ html, body {
   gap: 10px;
 }
 
+/* ---- Toolbox form list (level 2) ---- */
+.toolbox-form-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toolbox-form-card {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toolbox-form-card:hover {
+  border-color: var(--primary-light);
+  background: var(--primary-lighter);
+}
+
+.toolbox-form-card:active {
+  transform: scale(0.99);
+}
+
+.form-card-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.toolbox-form-card h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.toolbox-form-card p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.form-arrow {
+  font-size: 24px;
+  color: var(--text-secondary);
+  margin-left: 12px;
+  flex-shrink: 0;
+  font-weight: 300;
+}
+
+/* ---- Toolbox detail view (level 3) ---- */
+.detail-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 12px;
+}
+
+.detail-description {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.detail-section {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.detail-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  background: var(--surface);
+  transition: background 0.15s;
+}
+
+.detail-section-header:hover {
+  background: var(--bg);
+}
+
+.detail-section-header h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.detail-toggle {
+  font-size: 18px;
+  color: var(--text-secondary);
+  font-weight: 300;
+  transition: transform 0.2s;
+}
+
+.detail-section.open .detail-toggle {
+  transform: rotate(45deg);
+}
+
+.detail-section-body {
+  display: none;
+  padding: 0 16px 16px;
+}
+
+.detail-section.open .detail-section-body {
+  display: block;
+}
+
+.detail-list {
+  list-style: none;
+  padding: 0;
+}
+
+.detail-list li {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  padding: 3px 0 3px 18px;
+  position: relative;
+}
+
+.detail-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.detail-advantages li::before {
+  background: var(--accent);
+}
+
+.detail-limits li::before {
+  background: #f59e0b;
+}
+
+.detail-nuances,
+.detail-legal {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.detail-howto {
+  padding-left: 20px;
+}
+
+.detail-howto li {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  padding: 3px 0;
+}
+
+.detail-example {
+  padding: 12px;
+  background: var(--primary-lighter);
+  border-radius: 8px;
+  border-left: 3px solid var(--primary-light);
+  margin-bottom: 8px;
+}
+
+.detail-example:last-child {
+  margin-bottom: 0;
+}
+
+.detail-example-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+
+.detail-example p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.detail-related {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.detail-related-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.detail-related-btn {
+  padding: 6px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--primary-light);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.detail-related-btn:hover {
+  border-color: var(--primary-light);
+  background: var(--primary-lighter);
+}
+
 .toolbox-card {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
