@@ -28,7 +28,7 @@ const PHASES = [
     id: 1,
     name: 'Expression libre',
     description: 'Exprime librement ce qui te préoccupe dans la société',
-    welcome: "Bienvenue ! Je suis ton coach civique. Mon rôle est de t'aider à préparer ta participation à la délibération citoyenne. Ici, tous les sujets sont les bienvenus, sans aucun tabou.\n\nDis-moi simplement : qu'est-ce qui te préoccupe dans la société en ce moment ?",
+    welcome: "Bienvenue ! Je suis un assistant conversationnel basé sur l'intelligence artificielle. Avant de commencer, quelques points importants :\n\nJe n'ai pas la science infuse. Malgré ma bonne volonté, je porte les biais — plus ou moins conscients — de mes créateurs et de mes données d'entraînement. C'est ta responsabilité de garder un regard critique sur nos échanges. Voici mes limites :\n\n- Je ne remplace pas une vraie discussion entre citoyens\n- Je peux reproduire des angles morts culturels ou idéologiques sans m'en rendre compte\n- Je ne connais pas ta réalité locale ni ton vécu\n- Mes reformulations peuvent involontairement déformer ta pensée\n\nLes changements sociaux demandent bien plus qu'une conversation avec une IA : ils nécessitent beaucoup de discussions entre humains pour assurer une harmonie sociétale, mais aussi de l'organisation et de l'action concrète. Je suis là pour t'aider à clarifier tes idées et à les formuler pour qu'elles soient entendues — pas pour te dire quoi penser.\n\nCeci dit, tous les sujets sont les bienvenus ici, sans aucun tabou. Dis-moi simplement : qu'est-ce qui te préoccupe dans la société en ce moment ?",
     prompt: `PHASE ACTUELLE : Expression libre
 Ton rôle : accueillir ce que la personne exprime sur ce qui la préoccupe dans la société.
 - Écoute activement et relance simplement : "Et quoi d'autre ?", "Continue, je t'écoute", "C'est-à-dire ?"
@@ -142,11 +142,19 @@ function toggleVoice() {
   speechRecognition.onresult = (event) => {
     clearTimeout(silenceTimer);
 
-    let transcript = '';
+    let finalTranscript = '';
+    let interimTranscript = '';
+
     for (let i = 0; i < event.results.length; i++) {
-      transcript += event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        finalTranscript += event.results[i][0].transcript;
+      } else {
+        interimTranscript += event.results[i][0].transcript;
+      }
     }
-    input.value = transcript;
+
+    // Afficher le final + l'interim en cours (sans doublons)
+    input.value = finalTranscript + interimTranscript;
 
     // 4s sans parole = envoi automatique
     silenceTimer = setTimeout(() => {
