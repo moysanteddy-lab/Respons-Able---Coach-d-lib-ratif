@@ -26,6 +26,13 @@
       <span class="menu-item disabled">Plan d'action (Gantt)</span>
       <span class="menu-item disabled">Indice démocratique</span>
       <div class="menu-separator"></div>
+      <div class="menu-item menu-toggle-row">
+        <span>Mode sombre</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="dark-mode-toggle">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
       <button class="menu-item menu-reset" id="new-session-btn">Nouvelle session</button>
     </nav>
   </aside>
@@ -42,6 +49,10 @@
       </div>
       <div class="header-spacer"></div>
     </header>
+
+    <div class="progress-bar" id="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
 
     <!-- Vue Coach -->
     <div class="view active" id="view-coach">

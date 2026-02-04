@@ -276,6 +276,36 @@ const MOBILISATION_FORMS = [
   }
 ];
 
+// ----- Suggestions de relance par phase -----
+
+const PHASE_SUGGESTIONS = {
+  1: [
+    "J'ai aussi un truc qui me dérange...",
+    "Je ne sais pas par où commencer",
+    "C'est tout pour le moment"
+  ],
+  2: [
+    "Ça me met en colère quand j'y pense",
+    "Je ne sais pas ce que je ressens",
+    "C'est lié à quelque chose que j'ai vécu"
+  ],
+  3: [
+    "Je crois que ma position c'est...",
+    "Je me contredis peut-être",
+    "Reformule-moi ce que tu comprends"
+  ],
+  4: [
+    "Essaie de me résumer ça simplement",
+    "Et si on me répond que... ?",
+    "Je veux que ce soit percutant"
+  ],
+  5: [
+    "Vas-y, challenge-moi",
+    "J'ai du mal à répondre là",
+    "Je veux faire le debrief"
+  ]
+};
+
 // ----- État -----
 
 const state = {
@@ -333,6 +363,63 @@ function clearSession() {
   addCoachMessage(phase.welcome);
   state.chatHistory.push({ role: 'assistant', content: phase.welcome });
   saveSession();
+  updateProgress();
+  showSuggestions();
+}
+
+// ----- Mémoire du sujet principal -----
+
+function getTopicContext() {
+  // Récupère les 3 premiers messages utilisateur pour identifier le sujet
+  const userMessages = state.chatHistory
+    .filter(m => m.role === 'user')
+    .slice(0, 3)
+    .map(m => m.content);
+  if (userMessages.length === 0) return '';
+  // Concaténation tronquée pour pas surcharger le prompt
+  return userMessages.join(' | ').substring(0, 500);
+}
+
+// ----- Notification sonore -----
+
+function playNotificationSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.setValueAtTime(1047, ctx.currentTime + 0.08);
+    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.25);
+  } catch (e) { /* Audio not available */ }
+}
+
+// ----- Mode sombre -----
+
+function initDarkMode() {
+  const toggle = document.getElementById('dark-mode-toggle');
+  const saved = localStorage.getItem('responsable-dark-mode');
+  if (saved === 'true') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    toggle.checked = true;
+    document.querySelector('meta[name="theme-color"]').content = '#1a2332';
+  }
+  toggle.addEventListener('change', () => {
+    if (toggle.checked) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('responsable-dark-mode', 'true');
+      document.querySelector('meta[name="theme-color"]').content = '#1a2332';
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('responsable-dark-mode', 'false');
+      document.querySelector('meta[name="theme-color"]').content = '#1e3a5f';
+    }
+  });
 }
 
 // ----- Reconnaissance vocale -----
@@ -436,6 +523,7 @@ function startRecognition() {
 // ----- Init -----
 
 function init() {
+  initDarkMode();
   renderPhases();
   renderToolbox();
   setupEventListeners();
@@ -450,12 +538,16 @@ function init() {
     updatePhaseInfo();
     restoreChat(saved.chatHistory);
     addSystemMessage('Session restaurée — tu peux reprendre où tu en étais.');
+    updateProgress();
+    showSuggestions();
   } else {
     updatePhaseInfo();
     const phase = PHASES[0];
     addCoachMessage(phase.welcome);
     state.chatHistory.push({ role: 'assistant', content: phase.welcome });
     saveSession();
+    updateProgress();
+    showSuggestions();
   }
 }
 
@@ -540,6 +632,19 @@ function updatePhaseButtons() {
   });
 }
 
+function updateProgress() {
+  const pct = (state.visitedPhases.size / PHASES.length) * 100;
+  const fill = document.getElementById('progress-fill');
+  if (fill) fill.style.width = pct + '%';
+}
+
+function scrollPhaseIntoView(phaseId) {
+  const btn = document.querySelector(`.phase-btn[data-phase="${phaseId}"]`);
+  if (btn) {
+    btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
+}
+
 function updatePhaseInfo() {
   const phase = PHASES.find(p => p.id === state.currentPhase);
   document.getElementById('phase-info-text').textContent = phase.description;
@@ -555,8 +660,11 @@ function switchPhase(phaseId) {
   state.chatHistory.push({ role: 'assistant', content: phase.welcome });
   updatePhaseButtons();
   updatePhaseInfo();
+  scrollPhaseIntoView(phaseId);
   scrollToBottom();
   saveSession();
+  updateProgress();
+  showSuggestions();
 }
 
 // ----- Messages -----
@@ -652,6 +760,58 @@ function scrollToBottom() {
   requestAnimationFrame(() => { chat.scrollTop = chat.scrollHeight; });
 }
 
+// ----- Suggestions de relance -----
+
+function showSuggestions() {
+  removeSuggestions();
+  const suggestions = PHASE_SUGGESTIONS[state.currentPhase];
+  if (!suggestions) return;
+
+  const chat = document.getElementById('chat');
+  const div = document.createElement('div');
+  div.className = 'suggestions';
+  div.id = 'suggestions';
+
+  suggestions.forEach(text => {
+    const chip = document.createElement('button');
+    chip.className = 'suggestion-chip';
+    chip.textContent = text;
+    chip.addEventListener('click', () => {
+      document.getElementById('input').value = text;
+      sendMessage();
+    });
+    div.appendChild(chip);
+  });
+
+  chat.appendChild(div);
+  scrollToBottom();
+}
+
+function removeSuggestions() {
+  const el = document.getElementById('suggestions');
+  if (el) el.remove();
+}
+
+// ----- Retry sur erreur -----
+
+function addRetryMessage(errorText, lastUserText) {
+  const chat = document.getElementById('chat');
+  const div = document.createElement('div');
+  div.className = 'message message-coach';
+  div.innerHTML = `<div class="bubble retry-bubble">
+    ${errorText}
+    <button class="retry-btn">Réessayer</button>
+  </div>`;
+  div.querySelector('.retry-btn').addEventListener('click', () => {
+    div.remove();
+    // Re-inject the last user message into input and resend
+    document.getElementById('input').value = lastUserText;
+    sendMessage();
+  });
+  chat.appendChild(div);
+  scrollToBottom();
+}
+
 // ----- Envoi de message -----
 
 async function sendMessage() {
@@ -659,6 +819,7 @@ async function sendMessage() {
   const text = input.value.trim();
   if (!text || state.loading) return;
 
+  removeSuggestions();
   addUserMessage(text);
   state.chatHistory.push({ role: 'user', content: text });
   input.value = '';
@@ -670,8 +831,10 @@ async function sendMessage() {
 
   try {
     const phase = PHASES.find(p => p.id === state.currentPhase);
+    const topicContext = getTopicContext();
+    const systemContent = BASE_PROMPT + phase.prompt + (topicContext ? `\n\nCONTEXTE : La personne a abordé les sujets suivants en début de conversation : ${topicContext}. Fais-y référence naturellement quand c'est pertinent.` : '');
     const messages = [
-      { role: 'system', content: BASE_PROMPT + phase.prompt },
+      { role: 'system', content: systemContent },
       ...state.chatHistory
     ];
 
@@ -688,11 +851,15 @@ async function sendMessage() {
     const reply = data.reply || "Hmm, je n'ai pas pu répondre. Réessaie !";
     state.chatHistory.push({ role: 'assistant', content: reply });
     addCoachMessage(reply);
+    playNotificationSound();
     saveSession();
+    showSuggestions();
 
   } catch (err) {
     hideTyping();
-    addCoachMessage("Désolé, problème de connexion. Vérifie ta connexion internet et réessaie.");
+    // Remove the user message from history so retry doesn't duplicate
+    state.chatHistory.pop();
+    addRetryMessage("Problème de connexion.", text);
     console.error('Erreur:', err);
   } finally {
     state.loading = false;
