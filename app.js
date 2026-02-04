@@ -153,126 +153,252 @@ const PHASE_INFO = {
 
 // ----- Formes de mobilisation citoyenne (Boîte à outils) -----
 
-const MOBILISATION_FORMS = [
+const TOOLBOX_CATEGORIES = [
   {
-    name: 'Pétition',
-    description: 'Recueil de signatures pour interpeller les pouvoirs publics sur un sujet. Peut être lancée en ligne ou en physique.',
-    advantages: [
-      'Accessible à tous, faible barrière à l\'entrée',
-      'Mesurable : le nombre de signatures crée une pression',
-      'Peut déclencher un débat médiatique'
-    ],
-    limits: [
-      'Facilement ignorée si pas relayée massivement',
-      'Risque de "slacktivisme" (signer sans s\'engager plus)',
-      'Aucune obligation légale de réponse'
-    ],
-    example: 'L\'Affaire du Siècle (France, 2018) — 2,3 millions de signatures pour action climatique. A mené au premier procès contre l\'État français pour inaction climatique, que l\'État a perdu.'
+    id: 'participation',
+    name: 'Dispositifs de participation',
+    subtitle: 'Les cadres institutionnels qui te donnent une place dans la décision',
+    forms: [
+      {
+        name: 'Budget participatif',
+        description: 'Les citoyens proposent et votent directement pour des projets financés par une partie du budget public de leur collectivité.',
+        advantages: [
+          'Pouvoir décisionnel réel : les projets votés sont réalisés',
+          'Résultats concrets et visibles dans le quotidien',
+          'Éducation citoyenne sur la gestion des fonds publics'
+        ],
+        limits: [
+          'Souvent limité à un petit pourcentage du budget total',
+          'Tendance à favoriser les projets visibles (bancs, parcs) au détriment du structurel',
+          'Participation parfois faible et peu représentative'
+        ],
+        example: 'Porto Alegre (Brésil, 1989) — Premier budget participatif au monde. En 10 ans, l\'accès à l\'eau potable est passé de 75% à 98% de la population grâce aux priorités définies par les citoyens.'
+      },
+      {
+        name: 'Convention citoyenne',
+        description: 'Panel de citoyens tirés au sort qui délibèrent en profondeur sur un sujet complexe, avec l\'aide d\'experts, et formulent des propositions.',
+        advantages: [
+          'Représentativité par tirage au sort (diversité sociale)',
+          'Délibération approfondie sur plusieurs mois',
+          'Forte légitimité démocratique des propositions'
+        ],
+        limits: [
+          'Coûteux et long à organiser',
+          'Pas toujours suivi d\'effets concrets',
+          'Les participants ne représentent qu\'un petit échantillon'
+        ],
+        example: 'Convention Citoyenne pour le Climat (France, 2019-2020) — 150 citoyens tirés au sort, 149 propositions. Malgré une mise en oeuvre partielle, elle a démontré la capacité des citoyens ordinaires à traiter des sujets complexes.'
+      },
+      {
+        name: 'Conseil de quartier',
+        description: 'Instance locale de démocratie de proximité où les habitants échangent avec les élus sur les sujets qui concernent leur quartier.',
+        advantages: [
+          'Ancrage local : traite des problèmes concrets du quotidien',
+          'Régularité des rencontres (lien durable avec les élus)',
+          'Ouvert à tous sans condition'
+        ],
+        limits: [
+          'Souvent consultatif seulement (pas de pouvoir décisionnel)',
+          'Participation souvent faible et vieillissante',
+          'Risque de noyautage par des habitués'
+        ],
+        example: 'Conseils de quartier parisiens (loi Vaillant, 2002) — Obligatoires dans les villes de +80 000 habitants. Résultats variables : très actifs dans certaines villes, purement formels dans d\'autres.'
+      },
+      {
+        name: 'Référendum local',
+        description: 'Vote direct des citoyens sur une question locale. Le résultat peut être consultatif ou décisionnel selon le cadre.',
+        advantages: [
+          'Décision directe et démocratiquement légitime',
+          'Forte mobilisation et intérêt citoyen',
+          'Tranche les débats de manière claire'
+        ],
+        limits: [
+          'Question binaire oui/non : simplifie des enjeux complexes',
+          'Conditions de validité strictes (seuils de participation)',
+          'Peut être instrumentalisé politiquement'
+        ],
+        example: 'Référendum de Notre-Dame-des-Landes (2016) — 55% pour la construction de l\'aéroport, mais le projet a finalement été abandonné en 2018 face à la mobilisation continue sur le terrain.'
+      },
+      {
+        name: 'Initiative citoyenne',
+        description: 'Mécanisme par lequel les citoyens peuvent proposer directement une loi, un référendum ou mettre un sujet à l\'agenda politique.',
+        advantages: [
+          'Pouvoir d\'initiative directe du peuple',
+          'Contourne l\'inertie des représentants',
+          'Force le débat public sur un sujet ignoré'
+        ],
+        limits: [
+          'Seuils de signatures souvent très élevés',
+          'Processus long et complexe',
+          'Peut être instrumentalisée par des lobbys'
+        ],
+        example: 'Initiative citoyenne européenne "Right2Water" (2013) — Première ICE à atteindre le million de signatures requis (1,8M au total). A mené à une directive européenne garantissant l\'accès à l\'eau potable.'
+      }
+    ]
   },
   {
-    name: 'Manifestation',
-    description: 'Mobilisation physique dans l\'espace public pour rendre visible une cause et exercer une pression collective.',
-    advantages: [
-      'Forte visibilité médiatique',
-      'Crée un sentiment de puissance collective',
-      'Pression directe sur les décideurs'
-    ],
-    limits: [
-      'Impact souvent éphémère sans suite organisée',
-      'Risque de récupération politique ou de débordements',
-      'Peut braquer l\'opinion publique si mal perçue'
-    ],
-    example: 'Marches pour le climat (2018-2019) — Des millions de personnes dans 150 pays. Portées par la jeunesse, elles ont accéléré l\'inscription du climat dans l\'agenda politique mondial.'
+    id: 'action',
+    name: 'Actions citoyennes',
+    subtitle: 'Les moyens de pression directe pour se faire entendre',
+    forms: [
+      {
+        name: 'Pétition',
+        description: 'Recueil de signatures pour interpeller les pouvoirs publics sur un sujet. Peut être lancée en ligne ou en physique.',
+        advantages: [
+          'Accessible à tous, faible barrière à l\'entrée',
+          'Mesurable : le nombre de signatures crée une pression',
+          'Peut déclencher un débat médiatique'
+        ],
+        limits: [
+          'Facilement ignorée si pas relayée massivement',
+          'Risque de "slacktivisme" (signer sans s\'engager plus)',
+          'Aucune obligation légale de réponse'
+        ],
+        example: 'L\'Affaire du Siècle (France, 2018) — 2,3 millions de signatures pour action climatique. A mené au premier procès contre l\'État français pour inaction climatique, que l\'État a perdu.'
+      },
+      {
+        name: 'Manifestation',
+        description: 'Mobilisation physique dans l\'espace public pour rendre visible une cause et exercer une pression collective.',
+        advantages: [
+          'Forte visibilité médiatique',
+          'Crée un sentiment de puissance collective',
+          'Pression directe sur les décideurs'
+        ],
+        limits: [
+          'Impact souvent éphémère sans suite organisée',
+          'Risque de récupération politique ou de débordements',
+          'Peut braquer l\'opinion publique si mal perçue'
+        ],
+        example: 'Marches pour le climat (2018-2019) — Des millions de personnes dans 150 pays. Portées par la jeunesse, elles ont accéléré l\'inscription du climat dans l\'agenda politique mondial.'
+      },
+      {
+        name: 'Grève',
+        description: 'Cessation collective et concertée du travail pour faire pression sur un employeur, un secteur ou l\'État. Droit constitutionnel en France depuis 1946.',
+        advantages: [
+          'Impact économique direct et mesurable',
+          'Droit constitutionnel protégé — ne peut pas être interdit',
+          'Solidarité forte entre grévistes, crée un rapport de force'
+        ],
+        limits: [
+          'Coût financier pour les grévistes (perte de salaire)',
+          'Peut diviser l\'opinion publique (usagers pénalisés)',
+          'Nécessite un taux de participation élevé pour être efficace'
+        ],
+        example: 'Mai 68 (France) — 10 millions de grévistes, plus grand mouvement social français. A abouti aux accords de Grenelle : +35% du SMIC, création de la section syndicale d\'entreprise, et une transformation culturelle durable.'
+      },
+      {
+        name: 'Association / Collectif citoyen',
+        description: 'Groupe structuré de citoyens organisés autour d\'une cause, avec un cadre juridique (loi 1901) ou informel.',
+        advantages: [
+          'Action durable et structurée dans le temps',
+          'Cadre juridique qui permet de recevoir des fonds, agir en justice',
+          'Capacité d\'expertise et de plaidoyer'
+        ],
+        limits: [
+          'Dépendance au bénévolat (risque d\'essoufflement)',
+          'Complexité administrative',
+          'Peut se professionnaliser et perdre son ancrage citoyen'
+        ],
+        example: 'ATD Quart Monde (1957) — Pionnière de la participation des personnes en précarité aux décisions publiques. A contribué à la loi contre l\'exclusion de 1998 et à la création du RSA.'
+      },
+      {
+        name: 'Boycott',
+        description: 'Refus collectif et organisé d\'acheter un produit, d\'utiliser un service ou de fréquenter une entreprise pour la forcer à changer ses pratiques.',
+        advantages: [
+          'Touche directement au portefeuille — le seul langage que certains comprennent',
+          'Peut être mené sans organisation formelle (viral sur les réseaux)',
+          'Force la transparence : les marques craignent l\'image publique'
+        ],
+        limits: [
+          'Difficile à maintenir dans la durée (lassitude des consommateurs)',
+          'Peut pénaliser les salariés plutôt que les dirigeants',
+          'Effet parfois dilué si le marché offre peu d\'alternatives'
+        ],
+        example: 'Boycott de Montgomery (USA, 1955-1956) — 381 jours de boycott des bus par la communauté afro-américaine après l\'arrestation de Rosa Parks. A abouti à la fin de la ségrégation dans les transports publics et lancé le mouvement des droits civiques.'
+      }
+    ]
   },
   {
-    name: 'Budget participatif',
-    description: 'Les citoyens proposent et votent directement pour des projets financés par une partie du budget public de leur collectivité.',
-    advantages: [
-      'Pouvoir décisionnel réel : les projets votés sont réalisés',
-      'Résultats concrets et visibles dans le quotidien',
-      'Éducation citoyenne sur la gestion des fonds publics'
-    ],
-    limits: [
-      'Souvent limité à un petit pourcentage du budget total',
-      'Tendance à favoriser les projets visibles (bancs, parcs) au détriment du structurel',
-      'Participation parfois faible et peu représentative'
-    ],
-    example: 'Porto Alegre (Brésil, 1989) — Premier budget participatif au monde. En 10 ans, l\'accès à l\'eau potable est passé de 75% à 98% de la population grâce aux priorités définies par les citoyens.'
-  },
-  {
-    name: 'Convention citoyenne',
-    description: 'Panel de citoyens tirés au sort qui délibèrent en profondeur sur un sujet complexe, avec l\'aide d\'experts, et formulent des propositions.',
-    advantages: [
-      'Représentativité par tirage au sort (diversité sociale)',
-      'Délibération approfondie sur plusieurs mois',
-      'Forte légitimité démocratique des propositions'
-    ],
-    limits: [
-      'Coûteux et long à organiser',
-      'Pas toujours suivi d\'effets concrets',
-      'Les participants ne représentent qu\'un petit échantillon'
-    ],
-    example: 'Convention Citoyenne pour le Climat (France, 2019-2020) — 150 citoyens tirés au sort, 149 propositions. Malgré une mise en oeuvre partielle, elle a démontré la capacité des citoyens ordinaires à traiter des sujets complexes.'
-  },
-  {
-    name: 'Conseil de quartier',
-    description: 'Instance locale de démocratie de proximité où les habitants échangent avec les élus sur les sujets qui concernent leur quartier.',
-    advantages: [
-      'Ancrage local : traite des problèmes concrets du quotidien',
-      'Régularité des rencontres (lien durable avec les élus)',
-      'Ouvert à tous sans condition'
-    ],
-    limits: [
-      'Souvent consultatif seulement (pas de pouvoir décisionnel)',
-      'Participation souvent faible et vieillissante',
-      'Risque de noyautage par des habitués'
-    ],
-    example: 'Conseils de quartier parisiens (loi Vaillant, 2002) — Obligatoires dans les villes de +80 000 habitants. Résultats variables : très actifs dans certaines villes, purement formels dans d\'autres.'
-  },
-  {
-    name: 'Association / Collectif citoyen',
-    description: 'Groupe structuré de citoyens organisés autour d\'une cause, avec un cadre juridique (loi 1901) ou informel.',
-    advantages: [
-      'Action durable et structurée dans le temps',
-      'Cadre juridique qui permet de recevoir des fonds, agir en justice',
-      'Capacité d\'expertise et de plaidoyer'
-    ],
-    limits: [
-      'Dépendance au bénévolat (risque d\'essoufflement)',
-      'Complexité administrative',
-      'Peut se professionnaliser et perdre son ancrage citoyen'
-    ],
-    example: 'ATD Quart Monde (1957) — Pionnière de la participation des personnes en précarité aux décisions publiques. A contribué à la loi contre l\'exclusion de 1998 et à la création du RSA.'
-  },
-  {
-    name: 'Référendum local',
-    description: 'Vote direct des citoyens sur une question locale. Le résultat peut être consultatif ou décisionnel selon le cadre.',
-    advantages: [
-      'Décision directe et démocratiquement légitime',
-      'Forte mobilisation et intérêt citoyen',
-      'Tranche les débats de manière claire'
-    ],
-    limits: [
-      'Question binaire oui/non : simplifie des enjeux complexes',
-      'Conditions de validité strictes (seuils de participation)',
-      'Peut être instrumentalisé politiquement'
-    ],
-    example: 'Référendum de Notre-Dame-des-Landes (2016) — 55% pour la construction de l\'aéroport, mais le projet a finalement été abandonné en 2018 face à la mobilisation continue sur le terrain.'
-  },
-  {
-    name: 'Initiative citoyenne',
-    description: 'Mécanisme par lequel les citoyens peuvent proposer directement une loi, un référendum ou mettre un sujet à l\'agenda politique.',
-    advantages: [
-      'Pouvoir d\'initiative directe du peuple',
-      'Contourne l\'inertie des représentants',
-      'Force le débat public sur un sujet ignoré'
-    ],
-    limits: [
-      'Seuils de signatures souvent très élevés',
-      'Processus long et complexe',
-      'Peut être instrumentalisée par des lobbys'
-    ],
-    example: 'Initiative citoyenne européenne "Right2Water" (2013) — Première ICE à atteindre le million de signatures requis (1,8M au total). A mené à une directive européenne garantissant l\'accès à l\'eau potable.'
+    id: 'unconventional',
+    name: 'Formes non-conventionnelles',
+    subtitle: 'Quand les voies classiques ne suffisent plus',
+    forms: [
+      {
+        name: 'Désobéissance civile',
+        description: 'Violation délibérée, publique et non-violente d\'une loi ou d\'une règle jugée injuste, en acceptant les conséquences juridiques.',
+        advantages: [
+          'Impact symbolique puissant — expose l\'injustice au grand jour',
+          'Tradition philosophique solide (Thoreau, Gandhi, King)',
+          'Peut accélérer des changements que des décennies de lobbying n\'ont pas obtenus'
+        ],
+        limits: [
+          'Risque juridique réel (amendes, prison)',
+          'Peut être mal compris ou rejeté par l\'opinion publique',
+          'Nécessite une discipline non-violente stricte pour garder sa légitimité'
+        ],
+        example: 'Faucheurs volontaires d\'OGM (France, 2003-2010) — Destruction assumée et publique de champs OGM en plein air. Malgré les condamnations, a contribué au moratoire français sur les cultures OGM en 2008, confirmé depuis.'
+      },
+      {
+        name: 'Occupation / ZAD',
+        description: 'Occupation physique d\'un lieu (terrain, bâtiment, espace public) pour empêcher un projet contesté ou créer une alternative concrète.',
+        advantages: [
+          'Crée un fait accompli — bloque physiquement un projet',
+          'Permet d\'expérimenter d\'autres modes de vie sur place',
+          'Forte couverture médiatique et pouvoir symbolique'
+        ],
+        limits: [
+          'Exposition à l\'expulsion et à la répression policière',
+          'Conditions de vie difficiles (précarité, météo)',
+          'Risque de marginalisation si le projet est perçu comme radical'
+        ],
+        example: 'ZAD de Notre-Dame-des-Landes (2008-2018) — Occupation de 1 650 hectares pendant 10 ans contre un projet d\'aéroport. Le projet a été abandonné en 2018. Certains occupants sont restés et développent des projets agricoles alternatifs.'
+      },
+      {
+        name: 'Lanceur d\'alerte',
+        description: 'Personne qui révèle publiquement des informations cachées sur des pratiques illégales, dangereuses ou contraires à l\'intérêt général.',
+        advantages: [
+          'Peut provoquer des changements massifs à partir d\'une seule révélation',
+          'Protection juridique renforcée en France depuis la loi Sapin 2 (2016) et la loi Waserman (2022)',
+          'Rôle essentiel de contre-pouvoir face aux institutions opaques'
+        ],
+        limits: [
+          'Risques personnels majeurs : licenciement, harcèlement, procès',
+          'Protection juridique encore insuffisante malgré les lois',
+          'Isolement social et professionnel fréquent'
+        ],
+        example: 'Irène Frachon (France, 2007-2010) — Pneumologue qui a révélé le scandale du Mediator (Servier), médicament responsable de 500 à 2 000 morts. Malgré les pressions du laboratoire, elle a obtenu le retrait du médicament et la condamnation de Servier.'
+      },
+      {
+        name: 'Art engagé / Culture militante',
+        description: 'Utilisation de l\'art (street art, théâtre de rue, musique, documentaire, détournement publicitaire) comme outil de sensibilisation et de mobilisation.',
+        advantages: [
+          'Touche les gens par l\'émotion, pas juste par l\'argument',
+          'Contourne la saturation de l\'info classique — marque les esprits',
+          'Accessible à tous : pas besoin d\'être artiste professionnel'
+        ],
+        limits: [
+          'Impact difficilement mesurable',
+          'Risque de rester dans le symbolique sans effet politique concret',
+          'Peut être récupéré par le marketing (artwashing)'
+        ],
+        example: 'Banksy (international) — Son oeuvre sur le mur de séparation en Palestine a mondialement visibilisé la question. "Girl with Balloon" auto-détruite chez Sotheby\'s a généré un débat mondial sur l\'art et le marché. Dismaland a attiré 150 000 visiteurs autour d\'une critique radicale du consumérisme.'
+      },
+      {
+        name: 'Action en justice citoyenne',
+        description: 'Utilisation des tribunaux par des citoyens ou associations pour contraindre l\'État ou des entreprises à respecter leurs obligations (environnementales, sociales, sanitaires).',
+        advantages: [
+          'Force contraignante : une décision de justice s\'impose',
+          'Crée des précédents juridiques qui profitent à tous',
+          'Peut obtenir ce que le politique refuse de faire'
+        ],
+        limits: [
+          'Procédures longues (années) et coûteuses',
+          'Nécessite des compétences juridiques pointues',
+          'Les décisions ne sont pas toujours appliquées'
+        ],
+        example: 'Affaire Urgenda (Pays-Bas, 2015-2019) — 886 citoyens ont attaqué l\'État néerlandais pour inaction climatique. Victoire en Cour suprême : l\'État obligé de réduire ses émissions de 25% avant fin 2020. Première décision au monde contraignant un État sur le climat.'
+      }
+    ]
   }
 ];
 
@@ -1003,48 +1129,71 @@ RÈGLES : Sois fidèle à ce que la personne a dit. Ne rajoute rien de ton cru. 
 
 // ----- Boîte à outils (rendu) -----
 
+let selectedCategory = null;
+
 function renderToolbox() {
   const container = document.getElementById('toolbox-content');
   const intro = `
     <div class="toolbox-intro">
       <h2>Se mobiliser : par où commencer ?</h2>
-      <p>Clarifier ses idées c'est bien. Les porter dans le monde réel, c'est mieux. Voici les principales formes de mobilisation citoyenne, avec leurs forces, leurs limites, et des exemples concrets de ce qu'elles ont produit.</p>
+      <p>Clarifier ses idées c'est bien. Les porter dans le monde réel, c'est mieux. Choisis une catégorie pour découvrir les formes de mobilisation citoyenne.</p>
     </div>
   `;
 
-  const cards = MOBILISATION_FORMS.map((form, i) => `
-    <div class="toolbox-card" id="card-${i}">
-      <div class="card-header" onclick="toggleCard(${i})">
-        <h3>${form.name}</h3>
-        <span class="card-toggle">+</span>
+  if (selectedCategory === null) {
+    // Vue catégories (cartes de navigation)
+    const catCards = TOOLBOX_CATEGORIES.map(cat => `
+      <div class="toolbox-category-card" onclick="selectCategory('${cat.id}')">
+        <h3>${cat.name}</h3>
+        <p>${cat.subtitle}</p>
+        <span class="category-count">${cat.forms.length} fiches</span>
       </div>
-      <div class="card-body">
-        <p class="card-description">${form.description}</p>
-        <div class="card-section">
-          <div class="card-section-title">Avantages</div>
-          <ul class="card-advantages">
-            ${form.advantages.map(a => `<li>${a}</li>`).join('')}
-          </ul>
+    `).join('');
+    container.innerHTML = intro + `<div class="toolbox-categories">${catCards}</div>`;
+  } else {
+    // Vue fiches d'une catégorie
+    const cat = TOOLBOX_CATEGORIES.find(c => c.id === selectedCategory);
+    const backBtn = `<button class="toolbox-back" onclick="selectCategory(null)">&larr; Toutes les catégories</button>`;
+    const catHeader = `<div class="toolbox-cat-header"><h3>${cat.name}</h3><p>${cat.subtitle}</p></div>`;
+    const cards = cat.forms.map((form, i) => `
+      <div class="toolbox-card" id="card-${selectedCategory}-${i}">
+        <div class="card-header" onclick="toggleCard('${selectedCategory}', ${i})">
+          <h3>${form.name}</h3>
+          <span class="card-toggle">+</span>
         </div>
-        <div class="card-section">
-          <div class="card-section-title">Limites</div>
-          <ul class="card-limits">
-            ${form.limits.map(l => `<li>${l}</li>`).join('')}
-          </ul>
-        </div>
-        <div class="card-section">
-          <div class="card-section-title">Exemple historique</div>
-          <div class="card-example">${form.example}</div>
+        <div class="card-body">
+          <p class="card-description">${form.description}</p>
+          <div class="card-section">
+            <div class="card-section-title">Avantages</div>
+            <ul class="card-advantages">
+              ${form.advantages.map(a => `<li>${a}</li>`).join('')}
+            </ul>
+          </div>
+          <div class="card-section">
+            <div class="card-section-title">Limites</div>
+            <ul class="card-limits">
+              ${form.limits.map(l => `<li>${l}</li>`).join('')}
+            </ul>
+          </div>
+          <div class="card-section">
+            <div class="card-section-title">Exemple historique</div>
+            <div class="card-example">${form.example}</div>
+          </div>
         </div>
       </div>
-    </div>
-  `).join('');
-
-  container.innerHTML = intro + `<div class="toolbox-cards">${cards}</div>`;
+    `).join('');
+    container.innerHTML = backBtn + catHeader + `<div class="toolbox-cards">${cards}</div>`;
+  }
 }
 
-function toggleCard(index) {
-  const card = document.getElementById('card-' + index);
+function selectCategory(catId) {
+  selectedCategory = catId;
+  renderToolbox();
+  document.getElementById('toolbox-content').scrollTop = 0;
+}
+
+function toggleCard(catId, index) {
+  const card = document.getElementById('card-' + catId + '-' + index);
   card.classList.toggle('open');
   if (card.classList.contains('open')) {
     setTimeout(() => {
