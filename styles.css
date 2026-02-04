@@ -215,6 +215,15 @@ html, body {
   margin: 8px 0;
 }
 
+.menu-reset {
+  color: #dc2626 !important;
+  font-weight: 500 !important;
+}
+
+.menu-reset:hover {
+  background: #fef2f2 !important;
+}
+
 .menu-soon-label {
   font-size: 10px;
   text-transform: uppercase;
@@ -414,6 +423,42 @@ html, body {
   background: var(--coach-bg);
   color: var(--text);
   border-bottom-left-radius: 4px;
+}
+
+/* ---- Markdown in chat ---- */
+.bubble ul.chat-list {
+  list-style: none;
+  padding: 4px 0;
+  margin: 4px 0;
+}
+
+.bubble ul.chat-list li {
+  padding: 2px 0 2px 16px;
+  position: relative;
+  line-height: 1.5;
+}
+
+.bubble ul.chat-list li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 10px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+}
+
+.message-user .bubble ul.chat-list li::before {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.bubble strong {
+  font-weight: 700;
+}
+
+.bubble em {
+  font-style: italic;
 }
 
 /* ---- System messages ---- */

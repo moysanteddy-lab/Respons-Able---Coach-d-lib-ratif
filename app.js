@@ -286,6 +286,55 @@ const state = {
   currentView: 'coach'
 };
 
+// ----- Persistence localStorage -----
+
+const STORAGE_KEY = 'responsable-coach-session';
+
+function saveSession() {
+  try {
+    const data = {
+      currentPhase: state.currentPhase,
+      visitedPhases: [...state.visitedPhases],
+      chatHistory: state.chatHistory,
+      timestamp: Date.now()
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.warn('Impossible de sauvegarder la session:', e);
+  }
+}
+
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    // Sessions de plus de 24h = expirées
+    if (Date.now() - data.timestamp > 24 * 60 * 60 * 1000) {
+      localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+    return data;
+  } catch (e) {
+    localStorage.removeItem(STORAGE_KEY);
+    return null;
+  }
+}
+
+function clearSession() {
+  localStorage.removeItem(STORAGE_KEY);
+  state.currentPhase = 1;
+  state.visitedPhases = new Set([1]);
+  state.chatHistory = [];
+  document.getElementById('chat').innerHTML = '';
+  updatePhaseButtons();
+  updatePhaseInfo();
+  const phase = PHASES[0];
+  addCoachMessage(phase.welcome);
+  state.chatHistory.push({ role: 'assistant', content: phase.welcome });
+  saveSession();
+}
+
 // ----- Reconnaissance vocale -----
 
 let speechRecognition = null;
@@ -389,12 +438,38 @@ function startRecognition() {
 function init() {
   renderPhases();
   renderToolbox();
-  updatePhaseInfo();
   setupEventListeners();
 
-  const phase = PHASES[0];
-  addCoachMessage(phase.welcome);
-  state.chatHistory.push({ role: 'assistant', content: phase.welcome });
+  const saved = loadSession();
+  if (saved && saved.chatHistory.length > 0) {
+    // Restaurer la session
+    state.currentPhase = saved.currentPhase;
+    state.visitedPhases = new Set(saved.visitedPhases);
+    state.chatHistory = saved.chatHistory;
+    updatePhaseButtons();
+    updatePhaseInfo();
+    restoreChat(saved.chatHistory);
+    addSystemMessage('Session restaurée — tu peux reprendre où tu en étais.');
+  } else {
+    updatePhaseInfo();
+    const phase = PHASES[0];
+    addCoachMessage(phase.welcome);
+    state.chatHistory.push({ role: 'assistant', content: phase.welcome });
+    saveSession();
+  }
+}
+
+function restoreChat(history) {
+  const chat = document.getElementById('chat');
+  let lastPhase = 1;
+  history.forEach(msg => {
+    if (msg.role === 'user') {
+      addUserMessage(msg.content);
+    } else if (msg.role === 'assistant') {
+      addCoachMessage(msg.content);
+    }
+  });
+  scrollToBottom();
 }
 
 // ----- Navigation entre vues -----
@@ -452,8 +527,16 @@ function updatePhaseButtons() {
   document.querySelectorAll('.phase-btn').forEach(btn => {
     const id = parseInt(btn.dataset.phase);
     btn.classList.remove('active', 'visited');
-    if (id === state.currentPhase) btn.classList.add('active');
-    else if (state.visitedPhases.has(id)) btn.classList.add('visited');
+    const numSpan = btn.querySelector('.phase-num');
+    if (id === state.currentPhase) {
+      btn.classList.add('active');
+      numSpan.textContent = id;
+    } else if (state.visitedPhases.has(id)) {
+      btn.classList.add('visited');
+      numSpan.innerHTML = '&#10003;'; // checkmark
+    } else {
+      numSpan.textContent = id;
+    }
   });
 }
 
@@ -473,6 +556,7 @@ function switchPhase(phaseId) {
   updatePhaseButtons();
   updatePhaseInfo();
   scrollToBottom();
+  saveSession();
 }
 
 // ----- Messages -----
@@ -518,11 +602,30 @@ function addActionButton(text, onClick) {
 }
 
 function formatText(text) {
-  const escaped = text
+  let out = text
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
-  return escaped.replace(/\n/g, '<br>');
+
+  // Bold **text** or __text__
+  out = out.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  out = out.replace(/__(.+?)__/g, '<strong>$1</strong>');
+
+  // Italic *text* or _text_ (mais pas dans les mots composés)
+  out = out.replace(/(?<!\w)\*([^*]+?)\*(?!\w)/g, '<em>$1</em>');
+  out = out.replace(/(?<!\w)_([^_]+?)_(?!\w)/g, '<em>$1</em>');
+
+  // Listes à puces (lignes commençant par - ou *)
+  out = out.replace(/\n/g, '<br>');
+  out = out.replace(/((?:<br>|^)[- *] .+(?:<br>[- *] .+)*)/g, (match) => {
+    const items = match.split('<br>')
+      .filter(line => /^[- *] .+/.test(line.trim()))
+      .map(line => `<li>${line.trim().replace(/^[- *] /, '')}</li>`)
+      .join('');
+    return items ? `<ul class="chat-list">${items}</ul>` : match;
+  });
+
+  return out;
 }
 
 function showTyping() {
@@ -585,6 +688,7 @@ async function sendMessage() {
     const reply = data.reply || "Hmm, je n'ai pas pu répondre. Réessaie !";
     state.chatHistory.push({ role: 'assistant', content: reply });
     addCoachMessage(reply);
+    saveSession();
 
   } catch (err) {
     hideTyping();
@@ -678,6 +782,27 @@ RÈGLES : Sois fidèle à ce que la personne a dit. Ne rajoute rien de ton cru. 
     const data = await response.json();
     const reply = data.reply || "Impossible de générer la synthèse. Réessaie !";
     addCoachMessage(reply);
+
+    // Bouton copier la synthèse
+    addActionButton('Copier ma synthèse', () => {
+      navigator.clipboard.writeText(reply).then(() => {
+        const btns = document.querySelectorAll('.action-btn');
+        const copyBtn = btns[btns.length - 2]; // avant-dernier (copier est avant "aller plus loin")
+        if (copyBtn) {
+          const original = copyBtn.textContent;
+          copyBtn.textContent = 'Copié !';
+          setTimeout(() => { copyBtn.textContent = original; }, 2000);
+        }
+      }).catch(() => {
+        // Fallback : sélection manuelle
+        const textarea = document.createElement('textarea');
+        textarea.value = reply;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      });
+    });
 
     // Bouton "Aller plus loin"
     addActionButton('Aller plus loin → Boîte à outils', () => switchView('toolbox'));
@@ -780,6 +905,14 @@ function setupEventListeners() {
   // Navigation menu
   document.querySelectorAll('.menu-item[data-view]').forEach(item => {
     item.addEventListener('click', () => switchView(item.dataset.view));
+  });
+
+  // Nouvelle session
+  document.getElementById('new-session-btn').addEventListener('click', () => {
+    if (confirm('Commencer une nouvelle session ? La conversation actuelle sera effacée.')) {
+      closeMenu();
+      clearSession();
+    }
   });
 }
 
