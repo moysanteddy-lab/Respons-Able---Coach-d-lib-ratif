@@ -1081,6 +1081,98 @@ html, body {
   color: var(--text);
 }
 
+/* ---- Obstacle cards (inside detail section) ---- */
+.obstacle-card {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.obstacle-card.open {
+  border-color: var(--primary-light);
+}
+
+.obstacle-card:last-child {
+  margin-bottom: 0;
+}
+
+.obstacle-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  cursor: pointer;
+  background: var(--surface);
+  transition: background 0.15s;
+  gap: 10px;
+}
+
+.obstacle-header:hover {
+  background: var(--bg);
+}
+
+.obstacle-doubt {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.obstacle-doubt::before {
+  content: '"';
+  color: var(--primary-light);
+  font-size: 18px;
+  font-weight: 700;
+  margin-right: 2px;
+}
+
+.obstacle-doubt::after {
+  content: '"';
+  color: var(--primary-light);
+  font-size: 18px;
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+.obstacle-toggle {
+  font-size: 18px;
+  color: var(--text-secondary);
+  font-weight: 300;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.obstacle-card.open .obstacle-toggle {
+  transform: rotate(45deg);
+}
+
+.obstacle-body {
+  display: none;
+  padding: 0 14px 14px;
+}
+
+.obstacle-card.open .obstacle-body {
+  display: block;
+}
+
+.obstacle-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.obstacle-response {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text);
+}
+
 .detail-related {
   display: flex;
   align-items: center;

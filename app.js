@@ -969,6 +969,22 @@ function renderToolbox() {
           </div>`).join(''));
     }
 
+    // Obstacles
+    if (form.obstacles && form.obstacles.length) {
+      const obstaclesBody = form.obstacles.map((o, idx) => `
+        <div class="obstacle-card" id="obstacle-${idx}">
+          <div class="obstacle-header" onclick="toggleObstacle(${idx})">
+            <span class="obstacle-doubt">${o.doubt}</span>
+            <span class="obstacle-toggle">+</span>
+          </div>
+          <div class="obstacle-body">
+            <div class="obstacle-title">${o.title}</div>
+            <p class="obstacle-response">${o.response}</p>
+          </div>
+        </div>`).join('');
+      sections += buildDetailSection(6, 'Anticiper les obstacles', obstaclesBody);
+    }
+
     // Related
     let relatedHtml = '';
     if (form.related && form.related.length) {
@@ -1012,6 +1028,11 @@ function selectForm(index) {
 function toggleDetailSection(index) {
   const section = document.getElementById('detail-section-' + index);
   if (section) section.classList.toggle('open');
+}
+
+function toggleObstacle(index) {
+  const card = document.getElementById('obstacle-' + index);
+  if (card) card.classList.toggle('open');
 }
 
 function navigateToForm(formName) {
