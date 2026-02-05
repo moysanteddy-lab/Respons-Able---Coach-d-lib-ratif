@@ -22,6 +22,7 @@
     <nav class="menu-nav">
       <button class="menu-item active" data-view="coach">Coach Civique</button>
       <button class="menu-item" data-view="toolbox">Boîte à outils</button>
+      <button class="menu-item" data-view="parcours">Mon Parcours</button>
       <div class="menu-separator"></div>
       <div class="menu-soon-label">Bientôt disponible</div>
       <span class="menu-item disabled">Agora (débats citoyens)</span>
@@ -70,6 +71,7 @@
         <span id="phase-info-text"></span>
         <button class="info-btn" id="info-btn" aria-label="Plus d'infos">i</button>
       </div>
+      <div class="toolkit-banner" id="toolkit-banner"></div>
       <main class="chat" id="chat"></main>
       <footer class="input-bar">
         <textarea id="input" placeholder="Écris ton message..." rows="1"></textarea>
@@ -91,6 +93,11 @@
     <div class="view" id="view-toolbox">
       <div class="toolbox" id="toolbox-content"></div>
     </div>
+
+    <!-- Vue Mon Parcours -->
+    <div class="view" id="view-parcours">
+      <div class="parcours-content" id="parcours-content"></div>
+    </div>
   </div>
 
   <!-- Modal info phase -->
@@ -105,6 +112,7 @@
   </div>
 
   <script src="toolbox-data.js"></script>
+  <script src="toolkit-data.js"></script>
   <script src="coach-i18n.js"></script>
   <script src="app.js"></script>
 </body>

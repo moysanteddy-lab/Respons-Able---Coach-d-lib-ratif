@@ -257,7 +257,9 @@ TRANSITION :
     prompt: `PHASE ACTUELLE : Simulation de délibération
 Tu joues un CITOYEN OPPOSÉ — pas une caricature, un vrai humain avec des raisons légitimes de penser autrement. Tu es le sparring partner ultime.
 
-OBJECTIF : Que la personne vive le désaccord dans son corps et ses émotions, pas juste dans sa tête. Qu'elle apprenne à rester ancrée face à la contradiction.
+DOUBLE OBJECTIF :
+1. Que la personne vive le désaccord dans son corps et ses émotions, pas juste dans sa tête.
+2. Construire un COMPROMIS SOLIDE — pas un consensus mou, un vrai terrain d'entente qui respecte les non-négociables de chaque côté.
 
 TECHNIQUE — LE SPARRING CITOYEN :
 
@@ -277,20 +279,28 @@ TECHNIQUE — LE SPARRING CITOYEN :
    - Se bloque → "[Pause coach] Respire. Tu sens quoi là ? C'est exactement ce qui arrivera en délibération. Comment tu veux réagir ?"
    - S'énerve → "[Pause coach] L'énervement c'est un signal. Il dit quoi ?"
 
-4. LE MOMENT DE GRÂCE :
-   - À un moment, concède : "OK là tu marques un point. [Argument de la personne] c'est solide."
-   - Montrer que le désaccord n'est pas binaire.
+4. MOMENT DE RECONNAISSANCE MUTUELLE :
+   - Après 3-4 échanges, change de ton : "OK, on s'est bien secoués. Maintenant, identifions le terrain commun."
+   - "Sur quoi on est VRAIMENT d'accord, toi et moi ?" → Valide explicitement.
+   - "Quel est TON non-négociable ? Et moi je te dis le mien."
 
-5. LE DEBRIEF (sortir du rôle après 4-5 échanges) :
+5. CONSTRUIRE LE COMPROMIS :
+   - "On a chacun nos lignes rouges. Mais entre les deux, il y a une zone de flexibilité. On la cherche ?"
+   - Guide la formulation d'une proposition commune : "Si on devait formuler UNE proposition qui respecte tes valeurs ET les miennes, ça donnerait quoi ?"
+   - Insiste : un compromis solide ≠ "on est un peu d'accord sur tout" → c'est "on protège l'essentiel de chacun et on cède sur le reste".
+   - Si la personne formule un bon compromis : "Là, tu viens de faire de la VRAIE délibération."
+
+6. LE DEBRIEF (sortir du rôle) :
    "[Fin de la simulation]"
    - "C'était quoi le moment le plus dur ?"
    - "À quel moment tu as perdu pied — ou pris le dessus ?"
-   - "Qu'est-ce que tu ferais différemment ?"
-   - "Comment tu te sens là maintenant ?"
+   - "Le compromis qu'on a trouvé, tu le défendrais en vrai ?"
+   - "Qu'est-ce que tu ferais différemment la prochaine fois ?"
 
 RÈGLES :
 - JAMAIS méchant. Adversaire respectueux mais coriace.
 - Tu ne lâches PAS facilement. Si elle te convainc, elle l'aura mérité.
+- Le compromis est l'ABOUTISSEMENT, pas un raccourci.
 - Le debrief est AUSSI IMPORTANT que la simulation.
 - Après le debrief : "Tu es prêt(e). Génère ta synthèse avec le bouton vert."`
   }
@@ -383,7 +393,15 @@ const state = {
   phaseSummaries: {},
   loading: false,
   currentView: 'coach',
-  lang: 'fr'
+  lang: 'fr',
+  // Toolkit & Nuggets
+  toolkitSeenPhases: new Set(),
+  shownNuggets: new Set(),
+  phaseMessageCounts: {},
+  // Impact / Évolution
+  impactBefore: null,
+  impactAfter: null,
+  impactShownBefore: false
 };
 
 // ----- i18n helpers -----
@@ -433,6 +451,16 @@ function getSynthPrompt() {
   return (i18n && i18n.SYNTH_PROMPT) || null;
 }
 
+function getToolkit(phaseId) {
+  const i18n = getI18n();
+  return (i18n && i18n.PHASE_TOOLKIT && i18n.PHASE_TOOLKIT[phaseId]) || (typeof PHASE_TOOLKIT !== 'undefined' && PHASE_TOOLKIT[phaseId]) || null;
+}
+
+function getNuggets() {
+  const i18n = getI18n();
+  return (i18n && i18n.NUGGETS) || (typeof NUGGETS !== 'undefined' ? NUGGETS : []);
+}
+
 function setLanguage(lang) {
   state.lang = lang;
   localStorage.setItem('responsable-lang', lang);
@@ -466,6 +494,12 @@ function saveSession() {
       chatHistory: state.chatHistory,
       phaseSummaries: state.phaseSummaries,
       lang: state.lang,
+      toolkitSeenPhases: [...state.toolkitSeenPhases],
+      shownNuggets: [...state.shownNuggets],
+      phaseMessageCounts: state.phaseMessageCounts,
+      impactBefore: state.impactBefore,
+      impactAfter: state.impactAfter,
+      impactShownBefore: state.impactShownBefore,
       timestamp: Date.now()
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -497,7 +531,15 @@ function clearSession() {
   state.visitedPhases = new Set([1]);
   state.chatHistory = [];
   state.phaseSummaries = {};
+  state.toolkitSeenPhases = new Set();
+  state.shownNuggets = new Set();
+  state.phaseMessageCounts = {};
+  state.impactBefore = null;
+  state.impactAfter = null;
+  state.impactShownBefore = false;
   document.getElementById('chat').innerHTML = '';
+  document.getElementById('toolkit-banner').innerHTML = '';
+  document.getElementById('toolkit-banner').classList.remove('visible', 'expanded');
   updatePhaseButtons();
   updatePhaseInfo();
   const phase = getPhase(1);
@@ -506,6 +548,7 @@ function clearSession() {
   saveSession();
   updateProgress();
   showSuggestions();
+  showImpactBefore();
 }
 
 // ----- Mémoire du sujet principal -----
@@ -708,12 +751,19 @@ function init() {
     state.visitedPhases = new Set(saved.visitedPhases);
     state.chatHistory = saved.chatHistory;
     state.phaseSummaries = saved.phaseSummaries || {};
+    state.toolkitSeenPhases = new Set(saved.toolkitSeenPhases || []);
+    state.shownNuggets = new Set(saved.shownNuggets || []);
+    state.phaseMessageCounts = saved.phaseMessageCounts || {};
+    state.impactBefore = saved.impactBefore || null;
+    state.impactAfter = saved.impactAfter || null;
+    state.impactShownBefore = saved.impactShownBefore || false;
     updatePhaseButtons();
     updatePhaseInfo();
     restoreChat(saved.chatHistory);
     addSystemMessage(t('sessionRestored') || 'Session restaurée — tu peux reprendre où tu en étais.');
     updateProgress();
     showSuggestions();
+    renderToolkitBanner(state.currentPhase);
   } else {
     updatePhaseInfo();
     const phase = getPhase(1);
@@ -722,6 +772,7 @@ function init() {
     saveSession();
     updateProgress();
     showSuggestions();
+    showImpactBefore();
   }
 }
 
@@ -757,8 +808,12 @@ function switchView(viewId) {
     title.textContent = t('coachTitle') || 'Coach Civique';
     subtitle.textContent = t('coachSubtitle') || 'Prépare ta voix pour la délibération';
   } else if (viewId === 'toolbox') {
-    title.textContent = 'Boîte à outils';
-    subtitle.textContent = 'Formes de mobilisation citoyenne';
+    title.textContent = t('toolboxTitle') || 'Boîte à outils';
+    subtitle.textContent = t('toolboxSubtitle') || 'Formes de mobilisation citoyenne';
+  } else if (viewId === 'parcours') {
+    title.textContent = t('parcoursTitle') || 'Mon Parcours';
+    subtitle.textContent = t('parcoursSubtitle') || 'Techniques et évolution';
+    renderParcours();
   }
 
   closeMenu();
@@ -895,6 +950,7 @@ async function switchPhase(phaseId) {
 
   state.currentPhase = phaseId;
   state.visitedPhases.add(phaseId);
+  state.phaseMessageCounts[phaseId] = state.phaseMessageCounts[phaseId] || 0;
   const phase = getPhase(phaseId);
   const phaseLabel = t('phaseLabel') || 'Phase';
   addSystemMessage(`${phaseLabel} ${phase.id} — ${phase.name}`);
@@ -902,6 +958,7 @@ async function switchPhase(phaseId) {
   state.chatHistory.push({ role: 'assistant', content: phase.welcome });
   updatePhaseButtons();
   updatePhaseInfo();
+  renderToolkitBanner(phaseId);
   scrollPhaseIntoView(phaseId);
   scrollToBottom();
   saveSession();
@@ -1137,7 +1194,9 @@ async function sendMessage() {
     const data = await response.json();
     const reply = data.reply || t('noReply') || "Hmm, je n'ai pas pu répondre. Réessaie !";
     state.chatHistory.push({ role: 'assistant', content: reply });
+    state.phaseMessageCounts[state.currentPhase] = (state.phaseMessageCounts[state.currentPhase] || 0) + 1;
     addCoachMessage(reply);
+    checkAndShowNugget();
     playNotificationSound();
     saveSession();
     showSuggestions();
@@ -1191,6 +1250,9 @@ async function generateSynthesis() {
     return;
   }
 
+  // Montrer l'auto-évaluation "après" avant la synthèse
+  await showImpactAfter();
+
   state.loading = true;
   document.getElementById('send-btn').disabled = true;
   addSystemMessage(t('generatingSynthesis') || "Génération de ta synthèse...");
@@ -1220,7 +1282,21 @@ Résume les enseignements de la phase 6 (si elle a eu lieu).
 
 RÈGLES : Sois fidèle à ce que la personne a dit. Ne rajoute rien de ton cru. Utilise ses mots quand c'est possible. Si une phase n'a pas été abordée, indique-le simplement.`;
   const phaseMemory = getPhaseMemory();
-  const synthPrompt = getBasePrompt() + (getSynthPrompt() || defaultSynthBody) + phaseMemory;
+
+  // Injecter les données d'impact avant/après si disponibles
+  let impactContext = '';
+  if (state.impactBefore) {
+    impactContext += `\n\nAUTO-ÉVALUATION AVANT : Confiance ${state.impactBefore.confiance}/5, Clarté ${state.impactBefore.clarte}/5, Écoute ${state.impactBefore.ecoute}/5, Régulation ${state.impactBefore.regulation}/5`;
+    if (state.impactAfter) {
+      impactContext += `\nAUTO-ÉVALUATION APRÈS : Confiance ${state.impactAfter.confiance}/5, Clarté ${state.impactAfter.clarte}/5, Écoute ${state.impactAfter.ecoute}/5, Régulation ${state.impactAfter.regulation}/5`;
+      if (state.impactAfter.freeText) {
+        impactContext += `\nCE QUE LA PERSONNE RETIENT : "${state.impactAfter.freeText}"`;
+      }
+      impactContext += `\n\nAjoute une section MON ÉVOLUTION à la fin de la synthèse : commente les évolutions (positives ou non) de chaque compétence, et reprends ce que la personne retient.`;
+    }
+  }
+
+  const synthPrompt = getBasePrompt() + (getSynthPrompt() || defaultSynthBody) + phaseMemory + impactContext;
 
   try {
     // Garder plus de messages pour la synthèse (besoin de contexte large)
@@ -1474,6 +1550,391 @@ function navigateToForm(formName) {
       return;
     }
   }
+}
+
+// ----- Toolkit Banner -----
+
+function renderToolkitBanner(phaseId) {
+  const banner = document.getElementById('toolkit-banner');
+  const toolkit = getToolkit(phaseId);
+
+  if (!toolkit || !toolkit.tools || toolkit.tools.length === 0) {
+    banner.innerHTML = '';
+    banner.classList.remove('visible', 'expanded');
+    return;
+  }
+
+  const isFirstVisit = !state.toolkitSeenPhases.has(phaseId);
+  state.toolkitSeenPhases.add(phaseId);
+  saveSession();
+
+  const toolsHtml = toolkit.tools.map((tool, i) => `
+    <div class="toolkit-tool" id="toolkit-tool-${i}">
+      <div class="toolkit-tool-header" onclick="toggleToolkitTool(${i})">
+        <div class="toolkit-tool-info">
+          <div class="toolkit-tool-name">${tool.name}</div>
+          <div class="toolkit-tool-oneliner">${tool.oneliner}</div>
+        </div>
+        <span class="toolkit-tool-toggle">+</span>
+      </div>
+      <div class="toolkit-tool-body">
+        <div class="toolkit-neuroscience">${tool.neuroscience}</div>
+        <ol class="toolkit-steps">
+          ${tool.steps.map(s => `<li>${s}</li>`).join('')}
+        </ol>
+      </div>
+    </div>
+  `).join('');
+
+  const phaseNames = { 2: 'Exploration', 3: 'Clarification', 4: 'Formulation', 5: 'Confrontation', 6: 'Simulation' };
+
+  banner.innerHTML = `
+    <div class="toolkit-collapsed" onclick="toggleToolkitBanner()">
+      <span class="toolkit-collapsed-icon">\u{1F9E0}</span>
+      <span class="toolkit-collapsed-text">${toolkit.tools.length} ${t('toolkitAvailable') || 'techniques disponibles'}</span>
+      <span class="toolkit-collapsed-arrow">\u25BE</span>
+    </div>
+    <div class="toolkit-expanded">
+      <div class="toolkit-exp-header">
+        <span>\u{1F9E0} Toolkit Neuro \u2014 ${phaseNames[phaseId] || 'Phase ' + phaseId}</span>
+        <button class="toolkit-close" onclick="toggleToolkitBanner()">\u25B4</button>
+      </div>
+      ${toolsHtml}
+    </div>
+  `;
+
+  banner.classList.add('visible');
+  if (isFirstVisit) {
+    banner.classList.add('expanded');
+  } else {
+    banner.classList.remove('expanded');
+  }
+}
+
+function toggleToolkitBanner() {
+  document.getElementById('toolkit-banner').classList.toggle('expanded');
+}
+
+function toggleToolkitTool(index) {
+  const tool = document.getElementById('toolkit-tool-' + index);
+  if (tool) tool.classList.toggle('open');
+}
+
+// ----- Nuggets "Le saviez-vous?" -----
+
+function checkAndShowNugget() {
+  const allNuggets = getNuggets();
+  if (!allNuggets || allNuggets.length === 0) return;
+  const phase = state.currentPhase;
+  const count = state.phaseMessageCounts[phase] || 0;
+
+  for (const nugget of allNuggets) {
+    if (nugget.phase !== phase) continue;
+    if (state.shownNuggets.has(nugget.id)) continue;
+    if (nugget.trigger.type === 'messageCount' && count >= nugget.trigger.count) {
+      state.shownNuggets.add(nugget.id);
+      addNuggetMessage(nugget.icon, nugget.text);
+      saveSession();
+      return;
+    }
+  }
+}
+
+function addNuggetMessage(icon, text) {
+  const chat = document.getElementById('chat');
+  const div = document.createElement('div');
+  div.className = 'message-nugget';
+  div.innerHTML = `<span class="nugget-icon">${icon}</span><span class="nugget-text">${text}</span>`;
+  chat.appendChild(div);
+  scrollToBottom();
+}
+
+// ----- Impact / Évolution -----
+
+function showImpactBefore() {
+  if (state.impactBefore || state.impactShownBefore) return;
+  state.impactShownBefore = true;
+
+  const chat = document.getElementById('chat');
+  const card = document.createElement('div');
+  card.className = 'impact-card';
+  card.id = 'impact-before-card';
+
+  const labels = [
+    t('impactConfiance') || 'Confiance',
+    t('impactClarte') || 'Clarté',
+    t('impactEcoute') || 'Écoute',
+    t('impactRegulation') || 'Régulation'
+  ];
+  const keys = ['confiance', 'clarte', 'ecoute', 'regulation'];
+
+  card.innerHTML = `
+    <div class="impact-title">${t('impactBeforeTitle') || 'Où en es-tu avant de commencer ?'}</div>
+    <div class="impact-subtitle">${t('impactBeforeSubtitle') || 'Auto-évalue ces 4 compétences (1\u00a0=\u00a0faible, 5\u00a0=\u00a0fort)'}</div>
+    ${keys.map((key, i) => `
+      <div class="impact-slider-row">
+        <label>${labels[i]}</label>
+        <input type="range" min="1" max="5" value="3" class="impact-range impact-untouched" data-key="${key}">
+        <span class="impact-value">?</span>
+      </div>
+    `).join('')}
+    <button class="impact-submit impact-submit-disabled" onclick="submitImpactBefore()" disabled>${t('impactStart') || "C'est parti !"}</button>
+  `;
+
+  chat.appendChild(card);
+
+  const submitBtn = card.querySelector('.impact-submit');
+  const ranges = card.querySelectorAll('.impact-range');
+  const touched = new Set();
+
+  ranges.forEach(range => {
+    range.addEventListener('input', () => {
+      range.classList.remove('impact-untouched');
+      range.nextElementSibling.textContent = range.value;
+      touched.add(range.dataset.key);
+      if (touched.size === keys.length) {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('impact-submit-disabled');
+      }
+    });
+  });
+
+  scrollToBottom();
+}
+
+function submitImpactBefore() {
+  const card = document.getElementById('impact-before-card');
+  if (!card) return;
+
+  const data = {};
+  card.querySelectorAll('.impact-range').forEach(range => {
+    data[range.dataset.key] = parseInt(range.value);
+  });
+
+  state.impactBefore = data;
+  saveSession();
+
+  card.innerHTML = `
+    <div class="impact-summary">
+      <span class="impact-summary-icon">\u{1F4CA}</span>
+      <span>${t('impactRecorded') || 'Auto-évaluation enregistrée'} : ${t('impactConfiance') || 'Confiance'} ${data.confiance}/5 \u00B7 ${t('impactClarte') || 'Clarté'} ${data.clarte}/5 \u00B7 ${t('impactEcoute') || 'Écoute'} ${data.ecoute}/5 \u00B7 ${t('impactRegulation') || 'Régulation'} ${data.regulation}/5</span>
+    </div>
+  `;
+  card.className = 'impact-card impact-card-compact';
+}
+
+function showImpactAfter() {
+  return new Promise((resolve) => {
+    if (!state.impactBefore || state.impactAfter) {
+      resolve();
+      return;
+    }
+
+    const chat = document.getElementById('chat');
+    const card = document.createElement('div');
+    card.className = 'impact-card';
+    card.id = 'impact-after-card';
+
+    const labels = [
+      t('impactConfiance') || 'Confiance',
+      t('impactClarte') || 'Clarté',
+      t('impactEcoute') || 'Écoute',
+      t('impactRegulation') || 'Régulation'
+    ];
+    const keys = ['confiance', 'clarte', 'ecoute', 'regulation'];
+
+    card.innerHTML = `
+      <div class="impact-title">${t('impactAfterTitle') || 'Et maintenant, où en es-tu ?'}</div>
+      <div class="impact-subtitle">${t('impactAfterSubtitle') || 'Réévalue après ton parcours'}</div>
+      ${keys.map((key, i) => `
+        <div class="impact-slider-row">
+          <label>${labels[i]}</label>
+          <input type="range" min="1" max="5" value="3" class="impact-range impact-untouched" data-key="${key}">
+          <span class="impact-value">?</span>
+        </div>
+      `).join('')}
+      <div class="impact-freetext-row">
+        <label>${t('impactTakeawayLabel') || 'Une chose que tu retiens de cette session ?'}</label>
+        <textarea class="impact-freetext" id="impact-freetext" rows="2" placeholder="${t('impactTakeawayPlaceholder') || 'En une phrase...'}"></textarea>
+      </div>
+      <button class="impact-submit impact-submit-disabled" id="impact-after-submit" disabled>${t('impactSeeEvolution') || 'Voir mon évolution'}</button>
+    `;
+
+    chat.appendChild(card);
+
+    const afterSubmitBtn = card.querySelector('.impact-submit');
+    const afterRanges = card.querySelectorAll('.impact-range');
+    const afterTouched = new Set();
+
+    afterRanges.forEach(range => {
+      range.addEventListener('input', () => {
+        range.classList.remove('impact-untouched');
+        range.nextElementSibling.textContent = range.value;
+        afterTouched.add(range.dataset.key);
+        if (afterTouched.size === keys.length) {
+          afterSubmitBtn.disabled = false;
+          afterSubmitBtn.classList.remove('impact-submit-disabled');
+        }
+      });
+    });
+
+    document.getElementById('impact-after-submit').addEventListener('click', () => {
+      const data = {};
+      card.querySelectorAll('.impact-range').forEach(range => {
+        data[range.dataset.key] = parseInt(range.value);
+      });
+      data.freeText = document.getElementById('impact-freetext').value.trim();
+
+      state.impactAfter = data;
+      saveSession();
+
+      renderImpactComparison(card);
+      resolve();
+    });
+
+    scrollToBottom();
+  });
+}
+
+function renderImpactComparison(container) {
+  const labels = {
+    confiance: t('impactConfiance') || 'Confiance',
+    clarte: t('impactClarte') || 'Clarté',
+    ecoute: t('impactEcoute') || 'Écoute',
+    regulation: t('impactRegulation') || 'Régulation'
+  };
+  const keys = ['confiance', 'clarte', 'ecoute', 'regulation'];
+
+  let html = keys.map(key => {
+    const before = state.impactBefore[key];
+    const after = state.impactAfter[key];
+    const delta = after - before;
+    const deltaClass = delta > 0 ? 'positive' : delta < 0 ? 'negative' : 'neutral';
+    const deltaText = delta > 0 ? `+${delta}` : `${delta}`;
+    return `
+      <div class="impact-comparison-row">
+        <span class="impact-comparison-label">${labels[key]}</span>
+        <div class="impact-comparison-bars">
+          <div class="impact-bar impact-bar-before" style="width:${before * 20}%"><span>${t('impactBefore') || 'Avant'} ${before}</span></div>
+          <div class="impact-bar impact-bar-after" style="width:${after * 20}%"><span>${t('impactAfterLabel') || 'Après'} ${after}</span></div>
+        </div>
+        <span class="impact-delta impact-delta-${deltaClass}">${deltaText}</span>
+      </div>
+    `;
+  }).join('');
+
+  if (state.impactAfter.freeText) {
+    html += `<div class="impact-takeaway"><strong>${t('impactTakeaway') || 'Ce que je retiens'} :</strong> ${state.impactAfter.freeText}</div>`;
+  }
+
+  container.innerHTML = `
+    <div class="impact-title">${t('impactEvolutionTitle') || 'Mon évolution'}</div>
+    <div class="impact-comparison">${html}</div>
+  `;
+  container.className = 'impact-card impact-card-result';
+  scrollToBottom();
+}
+
+// ----- Vue "Mon Parcours" -----
+
+function renderParcours() {
+  const container = document.getElementById('parcours-content');
+  let html = `<h2 class="parcours-main-title">${t('parcoursTitle') || 'Mon Parcours'}</h2>`;
+
+  // Section 1 : Évolution
+  if (state.impactBefore) {
+    html += '<div class="parcours-section">';
+    html += `<h3 class="parcours-section-title">${t('impactEvolutionTitle') || 'Mon évolution'}</h3>`;
+
+    const labels = {
+      confiance: t('impactConfiance') || 'Confiance',
+      clarte: t('impactClarte') || 'Clarté',
+      ecoute: t('impactEcoute') || 'Écoute',
+      regulation: t('impactRegulation') || 'Régulation'
+    };
+    const keys = ['confiance', 'clarte', 'ecoute', 'regulation'];
+
+    if (state.impactAfter) {
+      html += '<div class="impact-comparison">';
+      html += keys.map(key => {
+        const before = state.impactBefore[key];
+        const after = state.impactAfter[key];
+        const delta = after - before;
+        const deltaClass = delta > 0 ? 'positive' : delta < 0 ? 'negative' : 'neutral';
+        const deltaText = delta > 0 ? `+${delta}` : `${delta}`;
+        return `
+          <div class="impact-comparison-row">
+            <span class="impact-comparison-label">${labels[key]}</span>
+            <div class="impact-comparison-bars">
+              <div class="impact-bar impact-bar-before" style="width:${before * 20}%"><span>${t('impactBefore') || 'Avant'} ${before}</span></div>
+              <div class="impact-bar impact-bar-after" style="width:${after * 20}%"><span>${t('impactAfterLabel') || 'Après'} ${after}</span></div>
+            </div>
+            <span class="impact-delta impact-delta-${deltaClass}">${deltaText}</span>
+          </div>
+        `;
+      }).join('');
+      if (state.impactAfter.freeText) {
+        html += `<div class="impact-takeaway"><strong>${t('impactTakeaway') || 'Ce que je retiens'} :</strong> ${state.impactAfter.freeText}</div>`;
+      }
+      html += '</div>';
+    } else {
+      html += keys.map(key =>
+        `<div class="parcours-stat">${labels[key]} : ${state.impactBefore[key]}/5</div>`
+      ).join('');
+      html += `<p class="parcours-hint">${t('parcoursHint') || 'Complète ton parcours et génère ta synthèse pour voir ton évolution.'}</p>`;
+    }
+
+    html += '</div>';
+  }
+
+  // Section 2 : Mon parcours conversationnel (résumés de phases)
+  const summaryEntries = Object.entries(state.phaseSummaries);
+  if (summaryEntries.length > 0) {
+    html += '<div class="parcours-section">';
+    html += `<h3 class="parcours-section-title">${t('parcoursJourney') || 'Mon cheminement'}</h3>`;
+    const allPhaseNames = { 1: 'Expression libre', 2: 'Exploration', 3: 'Clarification', 4: 'Formulation', 5: 'Confrontation', 6: 'Simulation' };
+    summaryEntries.sort(([a], [b]) => a - b).forEach(([id, summary]) => {
+      html += `
+        <div class="parcours-summary-card">
+          <div class="parcours-summary-phase">${t('phaseLabel') || 'Phase'} ${id} \u2014 ${allPhaseNames[id] || ''}</div>
+          <div class="parcours-summary-text">${summary}</div>
+        </div>
+      `;
+    });
+    html += '</div>';
+  }
+
+  // Section 3 : Techniques par phase
+  html += '<div class="parcours-section">';
+  html += `<h3 class="parcours-section-title">${t('parcoursTechniques') || 'Mes techniques'}</h3>`;
+
+  const phaseNames = { 2: 'Exploration', 3: 'Clarification', 4: 'Formulation', 5: 'Confrontation', 6: 'Simulation' };
+
+  for (const phaseId of [2, 3, 4, 5, 6]) {
+    const toolkit = getToolkit(phaseId);
+    if (!toolkit) continue;
+
+    html += `
+      <div class="parcours-phase-group">
+        <div class="parcours-phase-label">${t('phaseLabel') || 'Phase'} ${phaseId} \u2014 ${phaseNames[phaseId]}</div>
+        ${toolkit.tools.map((tool, i) => `
+          <div class="detail-section" id="parcours-tool-${phaseId}-${i}">
+            <div class="detail-section-header" onclick="document.getElementById('parcours-tool-${phaseId}-${i}').classList.toggle('open')">
+              <h4>${tool.name}</h4>
+              <span class="detail-toggle">+</span>
+            </div>
+            <div class="detail-section-body">
+              <p class="toolkit-neuroscience">${tool.neuroscience}</p>
+              <ol class="toolkit-steps">${tool.steps.map(s => `<li>${s}</li>`).join('')}</ol>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  html += '</div>';
+  container.innerHTML = html;
 }
 
 // ----- Event listeners -----

@@ -259,7 +259,9 @@ TRANSICIÓN:
         prompt: `FASE ACTUAL: Simulación de deliberación
 Interpretas a un CIUDADANO OPUESTO — no una caricatura, un humano real con razones legítimas para pensar diferente. Eres el sparring partner definitivo.
 
-OBJETIVO: Que la persona viva el desacuerdo en su cuerpo y sus emociones, no solo en su cabeza. Que aprenda a mantenerse firme frente a la contradicción.
+DOBLE OBJETIVO:
+1. Que la persona viva el desacuerdo en su cuerpo y sus emociones, no solo en su cabeza.
+2. Construir un COMPROMISO SÓLIDO — no un consenso blando, un verdadero punto de encuentro que respete los no-negociables de cada lado.
 
 TÉCNICA — EL SPARRING CIUDADANO:
 
@@ -279,20 +281,28 @@ TÉCNICA — EL SPARRING CIUDADANO:
    - Se bloquea → "[Pausa coach] Respira. ¿Qué sientes ahí? Es exactamente lo que pasará en deliberación. ¿Cómo quieres reaccionar?"
    - Se enfada → "[Pausa coach] El enfado es una señal. ¿Qué está diciendo?"
 
-4. EL MOMENTO DE GRACIA:
-   - En algún momento, concede: "OK ahí marcas un punto. [Argumento de la persona] es sólido."
-   - Mostrar que el desacuerdo no es binario.
+4. MOMENTO DE RECONOCIMIENTO MUTUO:
+   - Después de 3-4 intercambios, cambia de tono: "OK, nos hemos sacudido bien. Ahora, identifiquemos el terreno común."
+   - "¿En qué estamos REALMENTE de acuerdo, tú y yo?" → Valida explícitamente.
+   - "¿Cuál es TU no-negociable? Y yo te digo el mío."
 
-5. EL DEBRIEF (salir del rol después de 4-5 intercambios):
+5. CONSTRUIR EL COMPROMISO:
+   - "Cada uno tiene sus líneas rojas. Pero entre las dos, hay una zona de flexibilidad. ¿La buscamos?"
+   - Guía la formulación de una propuesta común: "Si tuviéramos que formular UNA propuesta que respete tus valores Y los míos, ¿qué sería?"
+   - Insiste: un compromiso sólido ≠ "estamos un poco de acuerdo en todo" → es "protegemos lo esencial de cada uno y cedemos en el resto".
+   - Si la persona formula un buen compromiso: "Ahí, acabas de hacer VERDADERA deliberación."
+
+6. EL DEBRIEF (salir del rol):
    "[Fin de la simulación]"
    - "¿Cuál fue el momento más difícil?"
    - "¿En qué momento perdiste pie — o tomaste ventaja?"
-   - "¿Qué harías diferente?"
-   - "¿Cómo te sientes ahora mismo?"
+   - "El compromiso que encontramos, ¿lo defenderías de verdad?"
+   - "¿Qué harías diferente la próxima vez?"
 
 REGLAS:
 - NUNCA cruel. Adversario respetuoso pero duro.
 - NO cedes fácilmente. Si te convence, se lo habrá ganado.
+- El compromiso es la CULMINACIÓN, no un atajo.
 - El debrief es TAN IMPORTANTE como la simulación.
 - Después del debrief: "Estás listo/a. Genera tu síntesis con el botón verde."
 - DEBES responder SIEMPRE en español.`
@@ -404,6 +414,216 @@ Resume las enseñanzas de la fase 6 (si se realizó).
 
 REGLAS: Sé fiel a lo que la persona dijo. No añadas nada de tu cosecha. Usa sus palabras cuando sea posible. Si una fase no fue abordada, indícalo simplemente.`,
 
+    PHASE_TOOLKIT: {
+      2: {
+        tools: [
+          {
+            id: 'label-locate',
+            name: 'Label & Locate',
+            oneliner: 'Nombra tu emoci\u00f3n y local\u00edzala en tu cuerpo.',
+            neuroscience: 'Nombrar una emoci\u00f3n activa el c\u00f3rtex prefrontal y reduce la actividad de la am\u00edgdala en un 50\u00a0% (Lieberman et\u00a0al., UCLA 2007). Es el efecto \u00abaffect labeling\u00bb: poner una palabra a lo que sientes basta para regular.',
+            steps: [
+              'Cuando una emoci\u00f3n suba, det\u00e9nte un segundo.',
+              'N\u00f3mbrala lo m\u00e1s preciso posible: \u00abfrustraci\u00f3n\u00bb, \u00abimpotencia\u00bb, \u00abindignaci\u00f3n\u00bb\u2026',
+              'Local\u00edzala en tu cuerpo: \u00bfgarganta apretada? \u00bfpu\u00f1o cerrado? \u00bfest\u00f3mago anudado?',
+              'Obs\u00e9rvala 10\u00a0segundos sin intentar cambiarla.'
+            ]
+          },
+          {
+            id: 'trigger-mapping',
+            name: 'Trigger Mapping',
+            oneliner: 'Identifica qu\u00e9 dispara tus reacciones fuertes.',
+            neuroscience: 'El cerebro crea atajos emocionales (v\u00eda la am\u00edgdala) para reaccionar r\u00e1pido a amenazas percibidas. Al identificar conscientemente estos disparadores, creas nuevas conexiones neuronales que permiten una respuesta m\u00e1s reflexiva (LeDoux, 2015).',
+            steps: [
+              'Nota los momentos donde reaccionas fuerte (ira, indignaci\u00f3n, desprecio).',
+              'Identifica el disparador: \u00bfuna palabra, un tono, un tema, un tipo de persona?',
+              'Preg\u00fantate: \u00bfqu\u00e9 est\u00e1 amenazado en m\u00ed?',
+              'La pr\u00f3xima vez, reconocer\u00e1s la se\u00f1al antes de la reacci\u00f3n.'
+            ]
+          },
+          {
+            id: 'body-scan',
+            name: 'Body Scan r\u00e1pido',
+            oneliner: 'Escanea tu cuerpo en 30\u00a0segundos para identificar tus tensiones.',
+            neuroscience: 'La conciencia interoceptiva (conciencia de las se\u00f1ales corporales) est\u00e1 directamente correlacionada con la inteligencia emocional (Craig, 2009). Las emociones empiezan en el cuerpo antes de llegar a la conciencia.',
+            steps: [
+              'Cierra los ojos 30\u00a0segundos.',
+              'Escanea de la cabeza a los pies: \u00bfd\u00f3nde est\u00e1 la tensi\u00f3n?',
+              'Respira hacia esa zona 3\u00a0veces.',
+              'Observa qu\u00e9 cambia.'
+            ]
+          }
+        ]
+      },
+      3: {
+        tools: [
+          {
+            id: 'trois-colonnes',
+            name: 'T\u00e9cnica de las 3\u00a0columnas',
+            oneliner: 'Separa los hechos, tus interpretaciones y tus valores.',
+            neuroscience: 'El cerebro fusiona autom\u00e1ticamente percepci\u00f3n e interpretaci\u00f3n (sesgo de encuadre, Tversky & Kahneman, 1981). Forzar la separaci\u00f3n expl\u00edcita activa el sistema\u00a02 (pensamiento deliberado) y reduce los errores de juicio.',
+            steps: [
+              'Toma tu posici\u00f3n y div\u00eddela en 3\u00a0columnas.',
+              'Columna\u00a01 \u2014 HECHOS: lo que es verificable objetivamente.',
+              'Columna\u00a02 \u2014 INTERPRETACIONES: lo que concluyes (leg\u00edtimo pero personal).',
+              'Columna\u00a03 \u2014 VALORES: lo que crees, independientemente de los hechos.'
+            ]
+          },
+          {
+            id: 'question-paradoxale',
+            name: 'Pregunta parad\u00f3jica',
+            oneliner: '\u00ab\u00bfY si estuviera equivocado?\u00bb \u2014 la pregunta que libera el pensamiento.',
+            neuroscience: 'Forzarse a considerar la hip\u00f3tesis contraria activa el c\u00f3rtex prefrontal dorsolateral, la zona de la duda constructiva. Esto desactiva moment\u00e1neamente el sesgo de confirmaci\u00f3n y abre el espacio cognitivo (Mercier & Sperber, 2011).',
+            steps: [
+              'Toma tu convicci\u00f3n m\u00e1s fuerte.',
+              'Preg\u00fantate: \u00ab\u00bfY si estuviera completamente equivocado?\u00bb',
+              'Nota qu\u00e9 cambia en tu percepci\u00f3n.',
+              'Lo que resiste al ejercicio es tu n\u00facleo duro \u2014 tu verdadera posici\u00f3n.'
+            ]
+          }
+        ]
+      },
+      4: {
+        tools: [
+          {
+            id: 'regle-6-secondes',
+            name: 'Regla de los 6\u00a0segundos',
+            oneliner: '6\u00a0segundos de pausa entre el est\u00edmulo y tu respuesta.',
+            neuroscience: 'Se necesitan aproximadamente 6\u00a0segundos para que el cortisol (hormona del estr\u00e9s) atraviese el cerebro. Esperar 6\u00a0segundos antes de responder permite al c\u00f3rtex prefrontal retomar el control sobre la am\u00edgdala (Goleman, 2006).',
+            steps: [
+              'Cuando una objeci\u00f3n te toque, no respondas de inmediato.',
+              'Cuenta silenciosamente hasta 6.',
+              'Mientras, observa tu primera reacci\u00f3n sin actuar sobre ella.',
+              'Luego responde desde tu pensamiento reflexivo, no desde tu reacci\u00f3n.'
+            ]
+          },
+          {
+            id: 'steelman-reflexe',
+            name: 'Steelman reflejo',
+            oneliner: 'Reformula el argumento adverso en versi\u00f3n M\u00c1S fuerte antes de responder.',
+            neuroscience: 'El steelmanning fuerza al cerebro a simular la perspectiva del otro, activando la red de mentalizaci\u00f3n (uni\u00f3n temporo-parietal). Esto mejora la calidad de tus propios argumentos por efecto de contraste (Epley et\u00a0al., 2004).',
+            steps: [
+              'Escucha el argumento del otro hasta el final.',
+              'Reform\u00falalo en versi\u00f3n M\u00c1S fuerte: \u00abSi te entiendo bien, dices que\u2026\u00bb',
+              'Aseg\u00farate de que el otro valide tu reformulaci\u00f3n.',
+              'LUEGO reci\u00e9n responde. Tu contraargumento ser\u00e1 mucho m\u00e1s contundente.'
+            ]
+          },
+          {
+            id: 'phrase-ancre',
+            name: 'Frase-ancla',
+            oneliner: 'Una frase-referencia para recentrarte cuando pierdes pie.',
+            neuroscience: 'Las anclas cognitivas funcionan como atajos del c\u00f3rtex prefrontal. En situaci\u00f3n de estr\u00e9s, el cerebro busca patrones familiares. Una frase preparada de antemano sirve como boya de rescate neurol\u00f3gica (Baumeister et\u00a0al., 2007).',
+            steps: [
+              'Escribe una frase que resuma tu posici\u00f3n en 10\u00a0palabras m\u00e1x.',
+              'Memor\u00edzala como un reflejo.',
+              'Cuando pierdas el hilo en deliberaci\u00f3n, vuelve a esa frase.',
+              'Ejemplo: \u00abDefiendo esto porque X es no-negociable para m\u00ed.\u00bb'
+            ]
+          }
+        ]
+      },
+      5: {
+        tools: [
+          {
+            id: 'biais-confirmation',
+            name: 'Sesgo de confirmaci\u00f3n',
+            oneliner: 'Tu cerebro busca pruebas que te den la raz\u00f3n. S\u00e9lo s\u00e9 consciente.',
+            neuroscience: 'El sesgo de confirmaci\u00f3n es el sesgo cognitivo m\u00e1s poderoso: el cerebro filtra inconscientemente la informaci\u00f3n para confirmar las creencias existentes (Nickerson, 1998). Ser consciente de ello no lo elimina, pero reduce su impacto en aproximadamente un 30\u00a0%.',
+            steps: [
+              'Antes de buscar informaci\u00f3n, anota tu posici\u00f3n actual.',
+              'Busca ACTIVAMENTE 3\u00a0argumentos o hechos CONTRA tu posici\u00f3n.',
+              'Eval\u00faalos honestamente: \u00bfcu\u00e1l es el m\u00e1s s\u00f3lido?',
+              'Ajusta tu posici\u00f3n si es necesario \u2014 o refu\u00e9rzala con conocimiento de causa.'
+            ]
+          },
+          {
+            id: 'echelle-certitude',
+            name: 'Escala de certeza',
+            oneliner: 'Puntua tu certeza de 1 a 10 antes y despu\u00e9s de la confrontaci\u00f3n.',
+            neuroscience: 'Cuantificar la certeza involucra al c\u00f3rtex cingulado anterior, la zona del \u00abmonitor de conflictos\u00bb cognitivo. Esto fuerza una evaluaci\u00f3n metacognitiva que reduce el sesgo de sobreconfianza (Fleming & Dolan, 2012).',
+            steps: [
+              'Antes de la confrontaci\u00f3n: \u00abMi certeza sobre esta posici\u00f3n es de X/10.\u00bb',
+              'Anota por qu\u00e9 est\u00e1s a ese nivel (no m\u00e1s alto, no m\u00e1s bajo).',
+              'Despu\u00e9s de la confrontaci\u00f3n: reevalua. \u00abAhora estoy a Y/10.\u00bb',
+              'El delta (X\u2212Y) te ense\u00f1a algo sobre tu flexibilidad intelectual.'
+            ]
+          }
+        ]
+      },
+      6: {
+        tools: [
+          {
+            id: 'point-accord-minimum',
+            name: 'Punto de acuerdo m\u00ednimo',
+            oneliner: 'Encuentra UN punto de acuerdo con tu adversario antes de debatir.',
+            neuroscience: 'El acuerdo activa el circuito de recompensa (estriado ventral) y reduce la respuesta de amenaza social. Empezar por un acuerdo, incluso m\u00ednimo, cambia la din\u00e1mica neuronal: del modo combate al modo colaboraci\u00f3n (Tabibnia & Lieberman, 2007).',
+            steps: [
+              'Escucha a tu oponente e identifica UN punto en el que est\u00e9s de acuerdo.',
+              'Dilo expl\u00edcitamente: \u00abEstamos de acuerdo en [X].\u00bb',
+              'Construye tu desacuerdo DESDE ese punto de acuerdo.',
+              'Eso transforma \u00abt\u00fa vs yo\u00bb en \u00abnosotros vs el problema\u00bb.'
+            ]
+          },
+          {
+            id: 'zoom-out',
+            name: 'Zoom Out',
+            oneliner: 'Retrocede 3\u00a0pasos para ver el panorama completo.',
+            neuroscience: 'La perspectiva ampliada activa el c\u00f3rtex prefrontal medial y desactiva el modo \u00abt\u00fanel\u00bb de la am\u00edgdala. Tomar distancia f\u00edsica y mental reactiva el pensamiento sist\u00e9mico (Kross et\u00a0al., 2014).',
+            steps: [
+              'Cuando el debate se estanca, preg\u00fantate: \u00abEn 10\u00a0a\u00f1os, \u00bfqu\u00e9 importa?\u00bb',
+              'Reformula el debate a un nivel de abstracci\u00f3n superior.',
+              'Busca el objetivo com\u00fan detr\u00e1s de las posiciones opuestas.',
+              'Eso desbloquea a menudo un punto muerto cambiando el marco.'
+            ]
+          },
+          {
+            id: 'steelman-live',
+            name: 'Steelman en vivo',
+            oneliner: 'En pleno debate, reformula la posici\u00f3n adversa mejor que el adversario.',
+            neuroscience: 'Versi\u00f3n avanzada del steelmanning. En situaci\u00f3n de estr\u00e9s social, hacerlo en tiempo real fuerza al c\u00f3rtex prefrontal a mantener el control a pesar de la presi\u00f3n emocional. Es un ejercicio de control cognitivo bajo carga (Ochsner & Gross, 2005).',
+            steps: [
+              'En pleno intercambio, det\u00e9nte: \u00abEspera, quiero asegurarme de entenderte bien.\u00bb',
+              'Reformula su posici\u00f3n de la forma m\u00e1s fuerte posible.',
+              'Espera su validaci\u00f3n: \u00ab\u00bfEs eso?\u00bb',
+              'Luego expone tu punto de vista. El efecto de respeto mutuo es inmediato.'
+            ]
+          }
+        ]
+      }
+    },
+
+    NUGGETS: [
+      {
+        id: 'amygdala-phase2',
+        phase: 2,
+        trigger: { type: 'messageCount', count: 3 },
+        icon: '\ud83e\udde0',
+        text: '\u00bfLo sab\u00edas? Cuando nombras una emoci\u00f3n, la actividad de tu am\u00edgdala (el \u00abcentro de alerta\u00bb del cerebro) disminuye cerca de un 50\u00a0%. Por eso hablar de ello alivia \u2014 literalmente. (Lieberman et\u00a0al., 2007)'
+      },
+      {
+        id: 'six-seconds-phase4',
+        phase: 4,
+        trigger: { type: 'messageCount', count: 2 },
+        icon: '\ud83e\udde0',
+        text: '\u00bfLo sab\u00edas? Se necesitan aproximadamente 6\u00a0segundos para que el cortisol (hormona del estr\u00e9s) atraviese tu cerebro. Contar hasta 6 antes de responder deja tiempo a tu pensamiento reflexivo para retomar el control.'
+      },
+      {
+        id: 'confirmation-bias-phase5',
+        phase: 5,
+        trigger: { type: 'messageCount', count: 1 },
+        icon: '\ud83e\udde0',
+        text: '\u00bfLo sab\u00edas? El sesgo de confirmaci\u00f3n es tan poderoso que incluso los expertos caen en \u00e9l: buscamos inconscientemente informaci\u00f3n que confirme lo que ya pensamos. Ser consciente de ello reduce su efecto en aproximadamente un 30\u00a0%. (Nickerson, 1998)'
+      },
+      {
+        id: 'prefrontal-phase6',
+        phase: 6,
+        trigger: { type: 'messageCount', count: 2 },
+        icon: '\ud83e\udde0',
+        text: '\u00bfLo sab\u00edas? En situaci\u00f3n de desacuerdo, tu c\u00f3rtex prefrontal (pensamiento racional) puede \u00abdesconectarse\u00bb a favor de la am\u00edgdala (reacci\u00f3n de supervivencia). Quedarse sin palabras frente a la oposici\u00f3n es neurol\u00f3gico \u2014 no falta de argumentos.'
+      }
+    ],
+
     UI: {
       coachTitle: 'Coach Cívico',
       coachSubtitle: 'Prepara tu voz para la deliberación',
@@ -428,7 +648,36 @@ REGLAS: Sé fiel a lo que la persona dijo. No añadas nada de tu cosecha. Usa su
       phaseModalWhy: '¿Por qué esta fase?',
       phaseModalBenefit: 'Lo que te aporta',
       phaseModalTip: 'Consejo',
-      language: 'Idioma'
+      language: 'Idioma',
+      // Toolkit
+      toolkitAvailable: 'técnicas disponibles',
+      // Impact
+      impactConfiance: 'Confianza',
+      impactClarte: 'Claridad',
+      impactEcoute: 'Escucha',
+      impactRegulation: 'Regulación',
+      impactBeforeTitle: '¿Dónde estás antes de empezar?',
+      impactBeforeSubtitle: 'Autoevalúa estas 4 competencias (1\u00a0=\u00a0bajo, 5\u00a0=\u00a0alto)',
+      impactStart: '¡Vamos!',
+      impactRecorded: 'Autoevaluación registrada',
+      impactAfterTitle: '¿Y ahora, dónde estás?',
+      impactAfterSubtitle: 'Reevalúa después de tu recorrido',
+      impactTakeawayLabel: '¿Una cosa que recuerdas de esta sesión?',
+      impactTakeawayPlaceholder: 'En una frase...',
+      impactSeeEvolution: 'Ver mi evolución',
+      impactEvolutionTitle: 'Mi evolución',
+      impactBefore: 'Antes',
+      impactAfterLabel: 'Después',
+      impactTakeaway: 'Lo que me llevo',
+      // Parcours
+      parcoursTitle: 'Mi Recorrido',
+      parcoursSubtitle: 'Técnicas y evolución',
+      parcoursTechniques: 'Mis técnicas',
+      parcoursHint: 'Completa tu recorrido y genera tu síntesis para ver tu evolución.',
+      parcoursJourney: 'Mi camino',
+      // Toolbox
+      toolboxTitle: 'Caja de herramientas',
+      toolboxSubtitle: 'Formas de movilización ciudadana'
     }
   }
 };
