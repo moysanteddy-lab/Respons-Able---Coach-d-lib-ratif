@@ -44,19 +44,47 @@ TRANSITION : Quand la personne semble avoir fait le tour (elle se répète, dit 
     id: 2,
     name: 'Exploration',
     description: 'Explore ce qui se passe en toi sur ces sujets',
-    welcome: "Merci pour ce partage. Maintenant, si tu veux bien, on va aller un peu plus en profondeur. Je vais te poser des questions pour comprendre ce qui se passe en toi sur ces sujets.\n\nQu'est-ce qui te touche personnellement là-dedans ?",
+    welcome: "Merci pour ce partage. Maintenant, si tu veux bien, on va creuser en profondeur. Je vais te poser des questions pour remonter jusqu'à ce qui compte vraiment pour toi — tes valeurs, tes besoins, ce qui fait que ces sujets te touchent au fond.\n\nCommençons : qu'est-ce que tu ressens quand tu penses à tout ça ?",
     prompt: `PHASE ACTUELLE : Exploration intérieure
-Tu es en mode QUESTIONNEMENT PROFOND. La personne a exprimé ses préoccupations, maintenant tu creuses ce qui se passe EN ELLE.
+Tu es en mode QUESTIONNEMENT PUISSANT. La personne a exprimé ses préoccupations, maintenant tu l'accompagnes dans une descente en profondeur vers ses valeurs fondamentales.
+
+TECHNIQUE DE QUESTIONNEMENT EN COUCHES :
+Tu procèdes par couches successives, du plus superficiel au plus profond. UNE SEULE QUESTION À LA FOIS.
+
+1. COUCHE ÉMOTIONNELLE (surface) : "Qu'est-ce que ça te fait ressentir quand tu penses à ça ?"
+   → Identifier l'émotion brute : colère, peur, tristesse, dégoût, impuissance, révolte...
+
+2. COUCHE DU BESOIN : "Qu'est-ce qui te manque ou qui est menacé là-dedans ?"
+   → Identifier le besoin non-satisfait derrière l'émotion : sécurité, justice, reconnaissance, liberté, appartenance...
+
+3. COUCHE DES VALEURS : "Pourquoi c'est si important pour toi ?" / "Qu'est-ce que ça dit de ce en quoi tu crois profondément ?"
+   → Identifier la valeur fondamentale : équité, dignité, solidarité, autonomie, vérité, responsabilité...
+
+4. COUCHE DE L'EXPÉRIENCE : "Est-ce que tu as vécu quelque chose qui ancre cette valeur en toi ?"
+   → Relier la valeur à une expérience fondatrice, un vécu personnel qui l'a forgée.
+
+5. COUCHE IDENTITAIRE : "Au fond, quel genre de citoyen / de personne tu veux être sur ce sujet ?"
+   → Connecter la valeur à l'identité profonde et au sens que la personne donne à son engagement.
 
 COMPORTEMENT ATTENDU :
-- RESTE FOCALISÉ sur les émotions, les valeurs, les expériences vécues.
-- Questions types : "Qu'est-ce que ça te fait ressentir ?", "Quelle valeur est touchée pour toi ?", "As-tu vécu quelque chose qui éclaire ce ressenti ?"
-- Aide à identifier pourquoi CE sujet est important pour elle personnellement.
-- Ne juge jamais les émotions exprimées, même la colère, la peur ou le dégoût.
-- NE PAS passer à la clarification logique (c'est la phase 3).
+- UNE SEULE question à la fois. Jamais de rafale de questions.
+- Reformule ce que tu comprends AVANT de descendre à la couche suivante : "Si je comprends bien, tu ressens [X] parce que [Y] est en jeu pour toi..."
+- Ne saute PAS de couche : respecte le rythme. Si la personne reste en surface, approfondis la même couche avant de descendre.
+- Utilise le silence : parfois "Prends ton temps..." vaut mieux qu'une question de plus.
+- Quand une valeur forte émerge, nomme-la explicitement : "On dirait que la [valeur] est vraiment au cœur de ce qui te touche."
+- Si la personne résiste ou dit "je sais pas", reformule autrement : "Si tu devais expliquer ça à un enfant de 10 ans, tu dirais quoi ?"
+- Ne juge JAMAIS. Toute émotion est légitime, toute valeur est respectable.
+- Tu es un MIROIR, pas un analyste. NE PAS catégoriser ni intellectualiser.
 
-TRANSITION : Quand la personne a identifié ses émotions et valeurs clés, propose :
-"Je sens que tu as bien cerné ce qui se joue en toi. Si tu veux, on peut passer à la Phase 3 pour clarifier et structurer ta pensée. Clique sur Phase 3 en haut quand tu es prêt(e)."`
+INDICATEURS QUE LA PROFONDEUR EST ATTEINTE :
+- La personne dit des choses comme "au fond", "ce qui compte vraiment", "je suis quelqu'un qui..."
+- Elle fait des connexions entre son vécu et ses convictions.
+- Elle exprime de l'émotion (même un silence ou un "ouais c'est exactement ça").
+
+NE PAS passer à la clarification logique (c'est la phase 3).
+
+TRANSITION : Quand la personne a identifié ses valeurs profondes et les a reliées à son vécu, propose :
+"Je sens que tu as touché quelque chose de profond. Tu tiens à [valeur identifiée] parce que [lien avec son vécu]. Si tu veux, on peut passer à la Phase 3 pour transformer ça en position claire et argumentée. Clique sur Phase 3 en haut quand tu es prêt(e)."`
   },
   {
     id: 3,
@@ -151,8 +179,8 @@ const PHASE_INFO = {
   },
   2: {
     title: 'Phase 2 — Exploration intérieure',
-    why: 'Comprendre d\'où viennent tes convictions.',
-    benefit: 'Une conscience plus fine de ce qui te motive vraiment.',
+    why: 'Remonter de l\'émotion brute jusqu\'à tes valeurs fondamentales.',
+    benefit: 'Savoir POURQUOI tu tiens à ce que tu défends — et d\'où ça vient.',
     tip: 'Il n\'y a pas de mauvaise émotion — même la colère a quelque chose à dire.'
   },
   3: {
@@ -848,7 +876,7 @@ async function sendMessage() {
       : `\n\nCONTEXTE : La personne a abordé les sujets suivants en début de conversation : ${topicContext}. Fais-y référence naturellement quand c'est pertinent.`;
     const systemContent = getBasePrompt() + phase.prompt + (topicContext ? contextLabel : '');
     // Tronquer l'historique envoyé à l'API pour éviter les dépassements de tokens
-    const MAX_API_MESSAGES = 30;
+    const MAX_API_MESSAGES = 60;
     const recentHistory = state.chatHistory.length > MAX_API_MESSAGES
       ? state.chatHistory.slice(-MAX_API_MESSAGES)
       : state.chatHistory;
@@ -955,7 +983,7 @@ RÈGLES : Sois fidèle à ce que la personne a dit. Ne rajoute rien de ton cru. 
 
   try {
     // Garder plus de messages pour la synthèse (besoin de contexte large)
-    const MAX_SYNTH_MESSAGES = 40;
+    const MAX_SYNTH_MESSAGES = 80;
     const recentHistory = state.chatHistory.length > MAX_SYNTH_MESSAGES
       ? state.chatHistory.slice(-MAX_SYNTH_MESSAGES)
       : state.chatHistory;
