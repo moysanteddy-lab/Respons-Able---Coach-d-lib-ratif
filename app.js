@@ -527,6 +527,7 @@ function loadSession() {
 
 function clearSession() {
   localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(ONBOARDING_KEY);
   state.currentPhase = 1;
   state.visitedPhases = new Set([1]);
   state.chatHistory = [];
@@ -548,6 +549,7 @@ function clearSession() {
   saveSession();
   updateProgress();
   showSuggestions();
+  showOnboarding();
   showImpactBefore();
 }
 
@@ -734,6 +736,7 @@ function init() {
   renderPhases();
   renderToolbox();
   setupEventListeners();
+  setupOnboardingListeners();
 
   const saved = loadSession();
 
@@ -765,6 +768,12 @@ function init() {
     showSuggestions();
     renderToolkitBanner(state.currentPhase);
   } else {
+    // Nouvelle session : afficher le tutoriel si jamais vu
+    const onboardingSeen = localStorage.getItem(ONBOARDING_KEY);
+    if (!onboardingSeen) {
+      showOnboarding();
+    }
+
     updatePhaseInfo();
     const phase = getPhase(1);
     addCoachMessage(phase.welcome);
@@ -1989,6 +1998,199 @@ function setupEventListeners() {
       setLanguage(langSelect.value);
     });
   }
+}
+
+// ----- Onboarding Tutorial -----
+
+const ONBOARDING_KEY = 'responsable-onboarding-seen';
+
+const PHASE_DESCRIPTIONS_FR = {
+  1: { name: 'Expression libre', desc: 'Exprime librement ce qui te préoccupe dans la société.' },
+  2: { name: 'Exploration', desc: 'Explore tes émotions, tes valeurs, ce qui te touche vraiment.' },
+  3: { name: 'Clarification', desc: 'Clarifie ta position et structure ta pensée.' },
+  4: { name: 'Formulation', desc: 'Formule des arguments clairs et convaincants.' },
+  5: { name: 'Confrontation', desc: 'Confronte ta position aux faits et aux contre-arguments.' },
+  6: { name: 'Simulation', desc: 'Simule un débat réel et apprends à gérer le désaccord.' }
+};
+
+const PHASE_DESCRIPTIONS_ES = {
+  1: { name: 'Expresión libre', desc: 'Expresa libremente lo que te preocupa de la sociedad.' },
+  2: { name: 'Exploración', desc: 'Explora tus emociones, tus valores, lo que realmente te importa.' },
+  3: { name: 'Clarificación', desc: 'Clarifica tu posición y estructura tu pensamiento.' },
+  4: { name: 'Formulación', desc: 'Formula argumentos claros y convincentes.' },
+  5: { name: 'Confrontación', desc: 'Confronta tu posición con los hechos y contraargumentos.' },
+  6: { name: 'Simulación', desc: 'Simula un debate real y aprende a gestionar el desacuerdo.' }
+};
+
+function getPhaseDescriptions() {
+  return getLang() === 'es' ? PHASE_DESCRIPTIONS_ES : PHASE_DESCRIPTIONS_FR;
+}
+
+let onboardingSlide = 1;
+let phaseAnimationInterval = null;
+let currentAnimatedPhase = 1;
+
+function showOnboarding() {
+  onboardingSlide = 1;
+  currentAnimatedPhase = 1;
+  populateOnboardingText();
+  updateOnboardingSlide();
+  document.getElementById('onboarding-overlay').classList.add('visible');
+}
+
+function populateOnboardingText() {
+  const isEs = getLang() === 'es';
+
+  // Skip button
+  document.getElementById('onboarding-skip').textContent = isEs ? 'Saltar' : 'Passer';
+
+  // Slide 1
+  document.querySelector('[data-slide="1"] h2').textContent = isEs ? 'Bienvenido a Coach Cívico' : 'Bienvenue sur Coach Civique';
+  document.querySelector('[data-slide="1"] .onboarding-main').textContent = isEs
+    ? 'Prepara tu voz para la deliberación ciudadana.'
+    : 'Prépare ta voix pour la délibération citoyenne.';
+  document.querySelector('[data-slide="1"] .onboarding-sub').textContent = isEs
+    ? 'Las técnicas que vas a descubrir aquí te servirán también en tu día a día — reuniones, debates, conversaciones difíciles. Donde sea que tu palabra importe.'
+    : 'Les techniques que tu vas découvrir ici te serviront aussi au quotidien — réunions, débats, conversations difficiles. Partout où ta parole compte.';
+
+  // Slide 2
+  document.querySelector('[data-slide="2"] h2').textContent = isEs ? 'Un recorrido en 6 fases' : 'Un parcours en 6 phases';
+
+  // Slide 3
+  document.querySelector('[data-slide="3"] h2').textContent = isEs ? 'Mide tu evolución' : 'Mesure ton évolution';
+  document.querySelector('[data-slide="3"] .onboarding-main').textContent = isEs
+    ? 'Al inicio y al final de cada sesión, evalúa 4 competencias clave:'
+    : 'Au début et à la fin de chaque session, évalue 4 compétences clés :';
+  const skillsSlide = document.querySelector('[data-slide="3"] .onboarding-skills');
+  if (skillsSlide) {
+    skillsSlide.innerHTML = isEs
+      ? '<span>Confianza</span><span>Claridad</span><span>Escucha</span><span>Regulación</span>'
+      : '<span>Confiance</span><span>Clarté</span><span>Écoute</span><span>Régulation</span>';
+  }
+  document.querySelector('[data-slide="3"] .onboarding-sub').textContent = isEs
+    ? 'Podrás ver tu progreso en "Mi Recorrido".'
+    : 'Tu pourras voir ta progression dans "Mon Parcours".';
+
+  // Slide 4
+  document.querySelector('[data-slide="4"] h2').textContent = isEs ? 'Técnicas validadas' : 'Des techniques validées';
+  document.querySelector('[data-slide="4"] .onboarding-main').textContent = isEs
+    ? 'En cada fase, herramientas basadas en neurociencias te acompañan.'
+    : 'À chaque phase, des outils issus des neurosciences t'accompagnent.';
+  document.querySelector('[data-slide="4"] .onboarding-sub').textContent = isEs
+    ? 'También verás "¿Sabías que?" — datos sobre cómo funciona tu cerebro en situación de debate.'
+    : 'Tu verras aussi des "Le saviez-vous ?" — des insights sur le fonctionnement de ton cerveau en situation de débat.';
+
+  // Slide 5
+  document.querySelector('[data-slide="5"] h2').textContent = isEs ? 'Caja de herramientas movilización' : 'Boîte à outils mobilisation';
+  document.querySelector('[data-slide="5"] .onboarding-main').textContent = isEs
+    ? 'Más allá del coaching, descubre las formas concretas de movilización ciudadana.'
+    : 'Au-delà du coaching, découvre les formes concrètes de mobilisation citoyenne.';
+  document.querySelector('[data-slide="5"] .onboarding-sub').textContent = isEs
+    ? 'Peticiones, manifestaciones, desobediencia civil... Todo lo que puede amplificar tu voz.'
+    : 'Pétitions, manifestations, désobéissance civile... Tout ce qui peut porter ta voix.';
+
+  // Slide 6
+  document.querySelector('[data-slide="6"] h2').textContent = isEs ? '¡Vamos!' : 'C'est parti !';
+  document.querySelector('[data-slide="6"] .onboarding-main').textContent = isEs
+    ? 'Estás listo/a para comenzar tu recorrido.'
+    : 'Tu es prêt·e à commencer ton parcours.';
+  document.getElementById('onboarding-start').textContent = isEs ? 'Comenzar' : 'Commencer';
+
+  // Next button
+  document.getElementById('onboarding-next').textContent = isEs ? 'Siguiente' : 'Suivant';
+}
+
+function hideOnboarding() {
+  document.getElementById('onboarding-overlay').classList.remove('visible');
+  localStorage.setItem(ONBOARDING_KEY, 'true');
+  stopPhaseAnimation();
+}
+
+function updateOnboardingSlide() {
+  // Update slides
+  document.querySelectorAll('.onboarding-slide').forEach(slide => {
+    slide.classList.toggle('active', parseInt(slide.dataset.slide) === onboardingSlide);
+  });
+  // Update dots
+  document.querySelectorAll('.onboarding-dots .dot').forEach(dot => {
+    dot.classList.toggle('active', parseInt(dot.dataset.slide) === onboardingSlide);
+  });
+  // Update next button visibility
+  const nextBtn = document.getElementById('onboarding-next');
+  nextBtn.style.display = onboardingSlide === 6 ? 'none' : 'block';
+
+  // Start phase animation if on slide 2
+  if (onboardingSlide === 2) {
+    startPhaseAnimation();
+  } else {
+    stopPhaseAnimation();
+  }
+}
+
+function nextOnboardingSlide() {
+  if (onboardingSlide < 6) {
+    onboardingSlide++;
+    updateOnboardingSlide();
+  }
+}
+
+function goToOnboardingSlide(slideNum) {
+  onboardingSlide = slideNum;
+  updateOnboardingSlide();
+}
+
+function startPhaseAnimation() {
+  currentAnimatedPhase = 1;
+  updatePhaseHighlight();
+
+  phaseAnimationInterval = setInterval(() => {
+    currentAnimatedPhase++;
+    if (currentAnimatedPhase > 6) {
+      currentAnimatedPhase = 1;
+      // Reset all to non-done state when looping
+      document.querySelectorAll('.onboarding-phase').forEach(p => p.classList.remove('done'));
+    }
+    updatePhaseHighlight();
+  }, 2500);
+}
+
+function stopPhaseAnimation() {
+  if (phaseAnimationInterval) {
+    clearInterval(phaseAnimationInterval);
+    phaseAnimationInterval = null;
+  }
+}
+
+function updatePhaseHighlight() {
+  const phases = document.querySelectorAll('.onboarding-phase');
+  phases.forEach(p => {
+    const phaseNum = parseInt(p.dataset.phase);
+    p.classList.remove('active');
+    if (phaseNum < currentAnimatedPhase) {
+      p.classList.add('done');
+    }
+    if (phaseNum === currentAnimatedPhase) {
+      p.classList.add('active');
+      p.classList.remove('done');
+    }
+  });
+
+  // Update description
+  const desc = getPhaseDescriptions()[currentAnimatedPhase];
+  if (desc) {
+    document.getElementById('onboarding-phase-name').textContent = desc.name;
+    document.getElementById('onboarding-phase-desc').textContent = desc.desc;
+  }
+}
+
+function setupOnboardingListeners() {
+  document.getElementById('onboarding-skip').addEventListener('click', hideOnboarding);
+  document.getElementById('onboarding-start').addEventListener('click', hideOnboarding);
+  document.getElementById('onboarding-next').addEventListener('click', nextOnboardingSlide);
+
+  document.querySelectorAll('.onboarding-dots .dot').forEach(dot => {
+    dot.addEventListener('click', () => goToOnboardingSlide(parseInt(dot.dataset.slide)));
+  });
 }
 
 // ----- Lancement -----

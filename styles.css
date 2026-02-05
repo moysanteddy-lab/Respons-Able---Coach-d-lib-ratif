@@ -1974,3 +1974,240 @@ html, body {
     padding-bottom: calc(12px + env(safe-area-inset-bottom));
   }
 }
+
+/* ---- Onboarding Tutorial ---- */
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 9999;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+.onboarding-overlay.visible {
+  display: flex;
+}
+
+.onboarding-modal {
+  background: var(--surface);
+  border-radius: var(--radius);
+  max-width: 420px;
+  width: 100%;
+  padding: 32px 28px 24px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.onboarding-skip {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.2s;
+}
+
+.onboarding-skip:hover {
+  color: var(--text);
+}
+
+.onboarding-slide {
+  display: none;
+  text-align: center;
+  min-height: 280px;
+}
+
+.onboarding-slide.active {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+.onboarding-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.onboarding-slide h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.onboarding-main {
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.onboarding-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+/* Phases animation */
+.onboarding-phases {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 24px 0 20px;
+}
+
+.onboarding-phase {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--border);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s ease;
+}
+
+.onboarding-phase.active {
+  background: var(--primary);
+  color: white;
+  transform: scale(1.15);
+  box-shadow: 0 4px 12px rgba(30, 58, 95, 0.3);
+}
+
+.onboarding-phase.done {
+  background: var(--accent);
+  color: white;
+}
+
+.onboarding-phase-info {
+  min-height: 80px;
+  padding: 0 10px;
+}
+
+.onboarding-phase-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 8px;
+  transition: opacity 0.3s;
+}
+
+.onboarding-phase-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  transition: opacity 0.3s;
+}
+
+/* Skills tags */
+.onboarding-skills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.onboarding-skills span {
+  background: var(--primary-lighter);
+  color: var(--primary);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Navigation */
+.onboarding-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.onboarding-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.onboarding-dots .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.onboarding-dots .dot.active {
+  background: var(--primary);
+  width: 24px;
+  border-radius: 4px;
+}
+
+.onboarding-next {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.onboarding-next:hover {
+  background: var(--primary-light);
+  transform: translateY(-1px);
+}
+
+.onboarding-start {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 14px 40px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.onboarding-start:hover {
+  background: #047857;
+  transform: translateY(-2px);
+}
+
+/* Hide next button on last slide */
+.onboarding-slide[data-slide="6"].active ~ .onboarding-nav .onboarding-next {
+  display: none;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .onboarding-modal {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .onboarding-phase.active {
+  box-shadow: 0 4px 12px rgba(127, 179, 224, 0.3);
+}
