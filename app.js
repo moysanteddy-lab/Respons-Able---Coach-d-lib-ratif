@@ -190,8 +190,77 @@ const state = {
   visitedPhases: new Set([1]),
   chatHistory: [],
   loading: false,
-  currentView: 'coach'
+  currentView: 'coach',
+  lang: 'fr'
 };
+
+// ----- i18n helpers -----
+
+function getLang() { return state.lang || 'fr'; }
+
+function getI18n() {
+  return getLang() === 'fr' ? null : COACH_I18N[getLang()];
+}
+
+function t(key) {
+  const i18n = getI18n();
+  return (i18n && i18n.UI && i18n.UI[key]) || null;
+}
+
+function getBasePrompt() {
+  const i18n = getI18n();
+  return (i18n && i18n.BASE_PROMPT) || BASE_PROMPT;
+}
+
+function getPhases() {
+  const i18n = getI18n();
+  return (i18n && i18n.PHASES) || PHASES;
+}
+
+function getPhase(phaseId) {
+  return getPhases().find(p => p.id === phaseId);
+}
+
+function getPhaseInfo(phaseId) {
+  const i18n = getI18n();
+  return (i18n && i18n.PHASE_INFO && i18n.PHASE_INFO[phaseId]) || PHASE_INFO[phaseId];
+}
+
+function getPhaseSuggestions(phaseId) {
+  const i18n = getI18n();
+  return (i18n && i18n.PHASE_SUGGESTIONS && i18n.PHASE_SUGGESTIONS[phaseId]) || PHASE_SUGGESTIONS[phaseId];
+}
+
+function getPhasePlaceholder(phaseId) {
+  const i18n = getI18n();
+  return (i18n && i18n.PHASE_PLACEHOLDERS && i18n.PHASE_PLACEHOLDERS[phaseId]) || PHASE_PLACEHOLDERS[phaseId];
+}
+
+function getSynthPrompt() {
+  const i18n = getI18n();
+  return (i18n && i18n.SYNTH_PROMPT) || null;
+}
+
+function setLanguage(lang) {
+  state.lang = lang;
+  localStorage.setItem('responsable-lang', lang);
+
+  // Update speech recognition language
+  if (speechRecognition) {
+    speechRecognition.lang = lang === 'es' ? 'es-ES' : 'fr-FR';
+  }
+
+  // Re-render coach UI
+  renderPhases();
+  updatePhaseInfo();
+  showSuggestions();
+
+  // Update header if on coach view
+  if (state.currentView === 'coach') {
+    document.getElementById('view-title').textContent = t('coachTitle') || 'Coach Civique';
+    document.getElementById('view-subtitle').textContent = t('coachSubtitle') || 'Prépare ta voix pour la délibération';
+  }
+}
 
 // ----- Persistence localStorage -----
 
@@ -203,6 +272,7 @@ function saveSession() {
       currentPhase: state.currentPhase,
       visitedPhases: [...state.visitedPhases],
       chatHistory: state.chatHistory,
+      lang: state.lang,
       timestamp: Date.now()
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -236,7 +306,7 @@ function clearSession() {
   document.getElementById('chat').innerHTML = '';
   updatePhaseButtons();
   updatePhaseInfo();
-  const phase = PHASES[0];
+  const phase = getPhase(1);
   addCoachMessage(phase.welcome);
   state.chatHistory.push({ role: 'assistant', content: phase.welcome });
   saveSession();
@@ -310,7 +380,7 @@ const SILENCE_DELAY = 4000;
 function toggleVoice() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
-    addCoachMessage("Ton navigateur ne supporte pas la reconnaissance vocale. Essaie Chrome ou Edge !");
+    addCoachMessage(t('voiceNotSupported') || "Ton navigateur ne supporte pas la reconnaissance vocale. Essaie Chrome ou Edge !");
     return;
   }
 
@@ -325,7 +395,7 @@ function toggleVoice() {
   isRecording = true;
   document.getElementById('mic-btn').classList.add('recording');
   const input = document.getElementById('input');
-  input.placeholder = "Je t'écoute... (4s de silence = envoi)";
+  input.placeholder = t('listeningPlaceholder') || "Je t'écoute... (4s de silence = envoi)";
   input.value = '';
 
   startRecognition();
@@ -337,7 +407,7 @@ function startRecognition() {
   const micBtn = document.getElementById('mic-btn');
 
   speechRecognition = new SpeechRecognition();
-  speechRecognition.lang = 'fr-FR';
+  speechRecognition.lang = getLang() === 'es' ? 'es-ES' : 'fr-FR';
   speechRecognition.continuous = false;
   speechRecognition.interimResults = true;
 
@@ -371,9 +441,9 @@ function startRecognition() {
     clearTimeout(silenceTimer);
     isRecording = false;
     micBtn.classList.remove('recording');
-    input.placeholder = 'Écris ton message...';
+    input.placeholder = getPhasePlaceholder(state.currentPhase) || t('writeMessage') || 'Écris ton message...';
     if (event.error === 'not-allowed') {
-      addCoachMessage("Autorise le micro dans ton navigateur pour utiliser la voix !");
+      addCoachMessage(t('micPermission') || "Autorise le micro dans ton navigateur pour utiliser la voix !");
     }
   };
 
@@ -382,12 +452,12 @@ function startRecognition() {
       try { startRecognition(); } catch (e) {
         isRecording = false;
         micBtn.classList.remove('recording');
-        input.placeholder = 'Écris ton message...';
+        input.placeholder = getPhasePlaceholder(state.currentPhase) || t('writeMessage') || 'Écris ton message...';
       }
     } else {
       clearTimeout(silenceTimer);
       micBtn.classList.remove('recording');
-      input.placeholder = 'Écris ton message...';
+      input.placeholder = getPhasePlaceholder(state.currentPhase) || t('writeMessage') || 'Écris ton message...';
     }
   };
 
@@ -406,6 +476,15 @@ function init() {
   setupEventListeners();
 
   const saved = loadSession();
+
+  // Restore language
+  const savedLang = localStorage.getItem('responsable-lang');
+  if (savedLang) {
+    state.lang = savedLang;
+    const langSelect = document.getElementById('lang-select');
+    if (langSelect) langSelect.value = savedLang;
+  }
+
   if (saved && saved.chatHistory.length > 0) {
     // Restaurer la session
     state.currentPhase = saved.currentPhase;
@@ -414,12 +493,12 @@ function init() {
     updatePhaseButtons();
     updatePhaseInfo();
     restoreChat(saved.chatHistory);
-    addSystemMessage('Session restaurée — tu peux reprendre où tu en étais.');
+    addSystemMessage(t('sessionRestored') || 'Session restaurée — tu peux reprendre où tu en étais.');
     updateProgress();
     showSuggestions();
   } else {
     updatePhaseInfo();
-    const phase = PHASES[0];
+    const phase = getPhase(1);
     addCoachMessage(phase.welcome);
     state.chatHistory.push({ role: 'assistant', content: phase.welcome });
     saveSession();
@@ -457,8 +536,8 @@ function switchView(viewId) {
   const subtitle = document.getElementById('view-subtitle');
 
   if (viewId === 'coach') {
-    title.textContent = 'Coach Civique';
-    subtitle.textContent = 'Prépare ta voix pour la délibération';
+    title.textContent = t('coachTitle') || 'Coach Civique';
+    subtitle.textContent = t('coachSubtitle') || 'Prépare ta voix pour la délibération';
   } else if (viewId === 'toolbox') {
     title.textContent = 'Boîte à outils';
     subtitle.textContent = 'Formes de mobilisation citoyenne';
@@ -483,13 +562,14 @@ function closeMenu() {
 
 function renderPhases() {
   const nav = document.getElementById('phases-nav');
-  const phaseBtns = PHASES.map(p => `
-    <button class="phase-btn ${p.id === 1 ? 'active' : ''}" data-phase="${p.id}">
+  const phases = getPhases();
+  const phaseBtns = phases.map(p => `
+    <button class="phase-btn ${p.id === state.currentPhase ? 'active' : ''} ${state.visitedPhases.has(p.id) && p.id !== state.currentPhase ? 'visited' : ''}" data-phase="${p.id}">
       <span class="phase-num">${p.id}</span>
       ${p.name}
     </button>
   `).join('');
-  nav.innerHTML = phaseBtns + `<button class="synth-btn" id="synth-btn">Ma synthèse</button>`;
+  nav.innerHTML = phaseBtns + `<button class="synth-btn" id="synth-btn">${t('synthBtn') || 'Ma synthèse'}</button>`;
 }
 
 function updatePhaseButtons() {
@@ -531,11 +611,11 @@ const PHASE_PLACEHOLDERS = {
 };
 
 function updatePhaseInfo() {
-  const phase = PHASES.find(p => p.id === state.currentPhase);
+  const phase = getPhase(state.currentPhase);
   document.getElementById('phase-info-text').textContent = phase.description;
   const input = document.getElementById('input');
   if (input && !isRecording) {
-    input.placeholder = PHASE_PLACEHOLDERS[state.currentPhase] || 'Écris ton message...';
+    input.placeholder = getPhasePlaceholder(state.currentPhase) || t('writeMessage') || 'Écris ton message...';
   }
 }
 
@@ -543,8 +623,9 @@ function switchPhase(phaseId) {
   if (phaseId === state.currentPhase || state.loading) return;
   state.currentPhase = phaseId;
   state.visitedPhases.add(phaseId);
-  const phase = PHASES.find(p => p.id === phaseId);
-  addSystemMessage(`Phase ${phase.id} — ${phase.name}`);
+  const phase = getPhase(phaseId);
+  const phaseLabel = t('phaseLabel') || 'Phase';
+  addSystemMessage(`${phaseLabel} ${phase.id} — ${phase.name}`);
   addCoachMessage(phase.welcome);
   state.chatHistory.push({ role: 'assistant', content: phase.welcome });
   updatePhaseButtons();
@@ -658,7 +739,7 @@ function scrollToBottom() {
 
 function showSuggestions() {
   removeSuggestions();
-  const suggestions = PHASE_SUGGESTIONS[state.currentPhase];
+  const suggestions = getPhaseSuggestions(state.currentPhase);
   if (!suggestions) return;
 
   const chat = document.getElementById('chat');
@@ -694,7 +775,7 @@ function addRetryMessage(errorText, lastUserText) {
   div.className = 'message message-coach';
   div.innerHTML = `<div class="bubble retry-bubble">
     ${errorText}
-    <button class="retry-btn">Réessayer</button>
+    <button class="retry-btn">${t('retryBtn') || 'Réessayer'}</button>
   </div>`;
   div.querySelector('.retry-btn').addEventListener('click', () => {
     div.remove();
@@ -724,9 +805,12 @@ async function sendMessage() {
   showTyping();
 
   try {
-    const phase = PHASES.find(p => p.id === state.currentPhase);
+    const phase = getPhase(state.currentPhase);
     const topicContext = getTopicContext();
-    const systemContent = BASE_PROMPT + phase.prompt + (topicContext ? `\n\nCONTEXTE : La personne a abordé les sujets suivants en début de conversation : ${topicContext}. Fais-y référence naturellement quand c'est pertinent.` : '');
+    const contextLabel = getLang() === 'es'
+      ? `\n\nCONTEXTO: La persona ha abordado los siguientes temas al inicio de la conversación: ${topicContext}. Haz referencia a ellos de forma natural cuando sea pertinente.`
+      : `\n\nCONTEXTE : La personne a abordé les sujets suivants en début de conversation : ${topicContext}. Fais-y référence naturellement quand c'est pertinent.`;
+    const systemContent = getBasePrompt() + phase.prompt + (topicContext ? contextLabel : '');
     const messages = [
       { role: 'system', content: systemContent },
       ...state.chatHistory
@@ -742,7 +826,7 @@ async function sendMessage() {
     if (!response.ok) throw new Error(`Erreur ${response.status}`);
 
     const data = await response.json();
-    const reply = data.reply || "Hmm, je n'ai pas pu répondre. Réessaie !";
+    const reply = data.reply || t('noReply') || "Hmm, je n'ai pas pu répondre. Réessaie !";
     state.chatHistory.push({ role: 'assistant', content: reply });
     addCoachMessage(reply);
     playNotificationSound();
@@ -753,7 +837,7 @@ async function sendMessage() {
     hideTyping();
     // Remove the user message from history so retry doesn't duplicate
     state.chatHistory.pop();
-    addRetryMessage("Problème de connexion.", text);
+    addRetryMessage(t('connectionError') || "Problème de connexion.", text);
     console.error('Erreur:', err);
   } finally {
     state.loading = false;
@@ -765,20 +849,20 @@ async function sendMessage() {
 // ----- Modal info phase -----
 
 function showPhaseInfo() {
-  const info = PHASE_INFO[state.currentPhase];
+  const info = getPhaseInfo(state.currentPhase);
   if (!info) return;
   document.getElementById('info-modal-title').textContent = info.title;
   document.getElementById('info-modal-body').innerHTML = `
     <div class="modal-field">
-      <div class="modal-label">Pourquoi cette phase</div>
+      <div class="modal-label">${t('phaseModalWhy') || 'Pourquoi cette phase'}</div>
       <div class="modal-value">${info.why}</div>
     </div>
     <div class="modal-field">
-      <div class="modal-label">Ce que ça t'apporte</div>
+      <div class="modal-label">${t('phaseModalBenefit') || "Ce que ça t'apporte"}</div>
       <div class="modal-value">${info.benefit}</div>
     </div>
     <div class="modal-field">
-      <div class="modal-label">Conseil</div>
+      <div class="modal-label">${t('phaseModalTip') || 'Conseil'}</div>
       <div class="modal-value">${info.tip}</div>
     </div>
   `;
@@ -794,16 +878,16 @@ function hidePhaseInfo() {
 async function generateSynthesis() {
   if (state.loading) return;
   if (state.chatHistory.length < 4) {
-    addCoachMessage("Échange encore un peu avec moi avant de générer ta synthèse — j'ai besoin de matière pour te faire un bon résumé !");
+    addCoachMessage(t('needMoreChat') || "Échange encore un peu avec moi avant de générer ta synthèse — j'ai besoin de matière pour te faire un bon résumé !");
     return;
   }
 
   state.loading = true;
   document.getElementById('send-btn').disabled = true;
-  addSystemMessage("Génération de ta synthèse...");
+  addSystemMessage(t('generatingSynthesis') || "Génération de ta synthèse...");
   showTyping();
 
-  const synthPrompt = BASE_PROMPT + `Tu dois maintenant produire une SYNTHÈSE complète du parcours de cette personne.
+  const defaultSynthBody = `Tu dois maintenant produire une SYNTHÈSE complète du parcours de cette personne.
 
 Structure ta synthèse ainsi :
 
@@ -823,12 +907,13 @@ CE QUE J'AI APPRIS DE LA SIMULATION
 Résume les enseignements de la phase 5 (si elle a eu lieu).
 
 RÈGLES : Sois fidèle à ce que la personne a dit. Ne rajoute rien de ton cru. Utilise ses mots quand c'est possible. Si une phase n'a pas été abordée, indique-le simplement.`;
+  const synthPrompt = getBasePrompt() + (getSynthPrompt() || defaultSynthBody);
 
   try {
     const messages = [
       { role: 'system', content: synthPrompt },
       ...state.chatHistory,
-      { role: 'user', content: 'Génère ma synthèse complète.' }
+      { role: 'user', content: getLang() === 'es' ? 'Genera mi síntesis completa.' : 'Génère ma synthèse complète.' }
     ];
 
     const response = await fetch(WORKER_URL, {
@@ -841,17 +926,17 @@ RÈGLES : Sois fidèle à ce que la personne a dit. Ne rajoute rien de ton cru. 
     if (!response.ok) throw new Error(`Erreur ${response.status}`);
 
     const data = await response.json();
-    const reply = data.reply || "Impossible de générer la synthèse. Réessaie !";
+    const reply = data.reply || t('synthError') || "Impossible de générer la synthèse. Réessaie !";
     addCoachMessage(reply);
 
     // Bouton copier la synthèse
-    addActionButton('Copier ma synthèse', () => {
+    addActionButton(t('copySynthesis') || 'Copier ma synthèse', () => {
       navigator.clipboard.writeText(reply).then(() => {
         const btns = document.querySelectorAll('.action-btn');
         const copyBtn = btns[btns.length - 2]; // avant-dernier (copier est avant "aller plus loin")
         if (copyBtn) {
           const original = copyBtn.textContent;
-          copyBtn.textContent = 'Copié !';
+          copyBtn.textContent = t('copied') || 'Copié !';
           setTimeout(() => { copyBtn.textContent = original; }, 2000);
         }
       }).catch(() => {
@@ -866,11 +951,11 @@ RÈGLES : Sois fidèle à ce que la personne a dit. Ne rajoute rien de ton cru. 
     });
 
     // Bouton "Aller plus loin"
-    addActionButton('Aller plus loin → Boîte à outils', () => switchView('toolbox'));
+    addActionButton(t('goFurther') || 'Aller plus loin → Boîte à outils', () => switchView('toolbox'));
 
   } catch (err) {
     hideTyping();
-    addCoachMessage("Désolé, impossible de générer la synthèse. Vérifie ta connexion.");
+    addCoachMessage(t('synthError') || "Désolé, impossible de générer la synthèse. Vérifie ta connexion.");
     console.error('Erreur:', err);
   } finally {
     state.loading = false;
@@ -1093,7 +1178,7 @@ function setupEventListeners() {
 
   // Nouvelle session
   document.getElementById('new-session-btn').addEventListener('click', () => {
-    if (confirm('Commencer une nouvelle session ? La conversation actuelle sera effacée.')) {
+    if (confirm(t('newSessionConfirm') || 'Commencer une nouvelle session ? La conversation actuelle sera effacée.')) {
       closeMenu();
       clearSession();
     }
@@ -1114,6 +1199,14 @@ function setupEventListeners() {
       e.returnValue = '';
     }
   });
+
+  // Language selector
+  const langSelect = document.getElementById('lang-select');
+  if (langSelect) {
+    langSelect.addEventListener('change', () => {
+      setLanguage(langSelect.value);
+    });
+  }
 }
 
 // ----- Lancement -----
