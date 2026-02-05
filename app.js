@@ -95,10 +95,34 @@ COMPORTEMENT ATTENDU :
 - NE PAS rejouer les phases précédentes (émotions, clarification).
 
 TRANSITION : Quand les arguments sont prêts, propose :
-"Tes arguments sont solides. Tu veux passer à la Phase 5 pour t'entraîner face à quelqu'un qui pense différemment ? Clique sur Phase 5 en haut. Sinon, tu peux aussi générer ta synthèse avec le bouton vert."`
+"Tes arguments sont solides. Tu veux passer à la Phase 5 pour confronter tes idées à des faits contradictoires sourcés ? Clique sur Phase 5 en haut. Sinon, tu peux aussi générer ta synthèse avec le bouton vert."`
   },
   {
     id: 5,
+    name: 'Avocat du diable',
+    description: 'Confronte tes idées à des faits et arguments contradictoires',
+    welcome: "Tes arguments sont formulés. Maintenant, jouons à l'avocat du diable.\n\nJe vais te confronter à des faits, des données et des études qui contredisent ou nuancent ta position. Mon but n'est pas de te faire changer d'avis — c'est de renforcer ta réflexion en testant la solidité de tes arguments face à la réalité.\n\nOn y va : reprends ta position principale, et je te réponds avec des faits sourcés.",
+    prompt: `PHASE ACTUELLE : Avocat du diable
+Tu changes de posture : tu deviens un CONTRADICTEUR INTELLECTUEL bienveillant mais rigoureux. Ton rôle est de confronter la personne à des FAITS, des DONNÉES et des ARGUMENTS SOURCÉS qui contredisent ou nuancent sa position construite dans les phases précédentes.
+
+COMPORTEMENT ATTENDU :
+- Tu t'appuies UNIQUEMENT sur des faits vérifiables : études scientifiques, données statistiques, rapports officiels (INSEE, OCDE, OMS, Banque Mondiale, etc.), exemples historiques documentés.
+- Tu CITES tes sources à chaque fois : nom de l'étude ou de l'organisme, année, chiffre clé. Exemple : "Selon l'INSEE (2023), le taux de... est de X%, ce qui contredit l'idée que..."
+- Tu ne cherches PAS à humilier ni à "gagner". Ton objectif : renforcer la réflexion en exposant les angles morts.
+- Tu présentes les contre-arguments de manière structurée : "En fait, selon [source, année], [fait contradictoire]."
+- Tu distingues clairement les faits des valeurs : "C'est ton droit de penser ça. Cependant, les données montrent que..."
+- Tu explores les conséquences non-anticipées, les groupes affectés différemment, les compromis nécessaires.
+- Tu identifies les biais cognitifs éventuels avec pédagogie (biais de confirmation, effet de halo, généralisation abusive, etc.) sans jamais être condescendant.
+- Si la personne modifie sa position face aux faits, accueille-le positivement — c'est un signe de maturité intellectuelle, pas de faiblesse.
+- Si elle maintient sa position malgré les faits, aide-la à articuler POURQUOI (ses valeurs priment, et c'est légitime).
+- NE PAS être moralisateur. NE PAS rejouer les phases précédentes.
+
+TRANSITION : Après 3-4 échanges de confrontation factuelle, propose un bilan :
+"On a bien secoué tes arguments. Qu'est-ce qui t'a surpris ? Est-ce que ta position a bougé, et si oui, comment ?"
+Puis : "Si tu veux, on peut passer à la Phase 6 pour t'entraîner émotionnellement face à un citoyen qui pense différemment. Clique sur Phase 6 en haut. Sinon, tu peux aussi générer ta synthèse avec le bouton vert."`
+  },
+  {
+    id: 6,
     name: 'Simulation',
     description: "Entraîne-toi face à un citoyen qui pense différemment",
     welcome: "C'est le moment de t'entraîner ! Je vais jouer le rôle d'un citoyen qui ne partage pas ton point de vue. Je serai respectueux mais pas d'accord.\n\nL'objectif : que tu t'exerces à écouter un désaccord et à répondre avec assurance.\n\nReprends ta position et je te répondrai en tant que citoyen opposé. On y va ?",
@@ -144,7 +168,13 @@ const PHASE_INFO = {
     tip: 'L\'objectif n\'est pas d\'avoir raison mais d\'être entendu.'
   },
   5: {
-    title: 'Phase 5 — Simulation',
+    title: 'Phase 5 — Avocat du diable',
+    why: 'Tester tes arguments face à des faits et données contradictoires.',
+    benefit: 'Des convictions plus solides, conscientes de leurs limites.',
+    tip: 'Changer d\'avis face aux faits, c\'est pas une faiblesse — c\'est de la lucidité.'
+  },
+  6: {
+    title: 'Phase 6 — Simulation',
     why: 'S\'entraîner à garder son calme face au désaccord.',
     benefit: 'De la confiance pour le jour J.',
     tip: 'Écouter l\'autre ne veut pas dire être d\'accord avec lui.'
@@ -177,6 +207,11 @@ const PHASE_SUGGESTIONS = {
     "Je veux que ce soit percutant"
   ],
   5: [
+    "Donne-moi tes meilleurs contre-arguments",
+    "Ce chiffre me surprend, explique",
+    "Ma position tient quand même, voici pourquoi"
+  ],
+  6: [
     "Vas-y, challenge-moi",
     "J'ai du mal à répondre là",
     "Je veux faire le debrief"
@@ -590,7 +625,7 @@ function updatePhaseButtons() {
 }
 
 function updateProgress() {
-  const pct = (state.visitedPhases.size / PHASES.length) * 100;
+  const pct = (state.visitedPhases.size / getPhases().length) * 100;
   const fill = document.getElementById('progress-fill');
   if (fill) fill.style.width = pct + '%';
 }
@@ -607,7 +642,8 @@ const PHASE_PLACEHOLDERS = {
   2: "Qu'est-ce que ça te fait ressentir ?",
   3: "Essaie de résumer ta position...",
   4: "Comment tu le dirais aux autres ?",
-  5: "Défends ta position..."
+  5: "Réponds aux contre-arguments...",
+  6: "Défends ta position..."
 };
 
 function updatePhaseInfo() {
@@ -811,9 +847,14 @@ async function sendMessage() {
       ? `\n\nCONTEXTO: La persona ha abordado los siguientes temas al inicio de la conversación: ${topicContext}. Haz referencia a ellos de forma natural cuando sea pertinente.`
       : `\n\nCONTEXTE : La personne a abordé les sujets suivants en début de conversation : ${topicContext}. Fais-y référence naturellement quand c'est pertinent.`;
     const systemContent = getBasePrompt() + phase.prompt + (topicContext ? contextLabel : '');
+    // Tronquer l'historique envoyé à l'API pour éviter les dépassements de tokens
+    const MAX_API_MESSAGES = 30;
+    const recentHistory = state.chatHistory.length > MAX_API_MESSAGES
+      ? state.chatHistory.slice(-MAX_API_MESSAGES)
+      : state.chatHistory;
     const messages = [
       { role: 'system', content: systemContent },
-      ...state.chatHistory
+      ...recentHistory
     ];
 
     const response = await fetch(WORKER_URL, {
@@ -903,16 +944,24 @@ Résume la position clarifiée en phase 3.
 COMMENT JE VEUX LE DIRE
 Résume les arguments formulés en phase 4.
 
+CE QUE LES FAITS M'ONT APPRIS
+Résume les confrontations factuelles de la phase 5 : quels contre-arguments sourcés ont été présentés, lesquels ont surpris la personne, et comment sa position a (ou n'a pas) évolué (si cette phase a eu lieu).
+
 CE QUE J'AI APPRIS DE LA SIMULATION
-Résume les enseignements de la phase 5 (si elle a eu lieu).
+Résume les enseignements de la phase 6 (si elle a eu lieu).
 
 RÈGLES : Sois fidèle à ce que la personne a dit. Ne rajoute rien de ton cru. Utilise ses mots quand c'est possible. Si une phase n'a pas été abordée, indique-le simplement.`;
   const synthPrompt = getBasePrompt() + (getSynthPrompt() || defaultSynthBody);
 
   try {
+    // Garder plus de messages pour la synthèse (besoin de contexte large)
+    const MAX_SYNTH_MESSAGES = 40;
+    const recentHistory = state.chatHistory.length > MAX_SYNTH_MESSAGES
+      ? state.chatHistory.slice(-MAX_SYNTH_MESSAGES)
+      : state.chatHistory;
     const messages = [
       { role: 'system', content: synthPrompt },
-      ...state.chatHistory,
+      ...recentHistory,
       { role: 'user', content: getLang() === 'es' ? 'Genera mi síntesis completa.' : 'Génère ma synthèse complète.' }
     ];
 
