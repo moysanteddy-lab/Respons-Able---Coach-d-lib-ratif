@@ -1013,10 +1013,13 @@ async function sendMessage() {
       ...recentHistory
     ];
 
+    const payload = { messages };
+    if (state.currentPhase === 5) payload.search = true;
+
     const response = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages })
+      body: JSON.stringify(payload)
     });
 
     hideTyping();
