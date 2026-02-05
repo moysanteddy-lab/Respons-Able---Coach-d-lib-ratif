@@ -92,14 +92,14 @@ COMPORTAMIENTO ESPERADO:
 - NO repetir las fases anteriores (emociones, clarificación).
 
 TRANSICIÓN: Cuando los argumentos están listos, propón:
-"Tus argumentos son sólidos. ¿Quieres pasar a la Fase 5 para confrontar tus ideas con hechos y datos contradictorios? Haz clic en Fase 5 arriba. Si no, también puedes generar tu síntesis con el botón verde."`
+"Tus argumentos son sólidos. ¿Quieres pasar a la Fase 5 — Confrontación — para poner a prueba tus ideas frente a hechos contradictorios? Haz clic en Fase 5 arriba. Si no, también puedes generar tu síntesis con el botón verde."`
       },
       {
         id: 5,
-        name: 'Abogado del diablo',
+        name: 'Confrontación',
         description: 'Confronta tus ideas con hechos y argumentos contradictorios',
-        welcome: "Tus argumentos están formulados. Ahora, juguemos al abogado del diablo.\n\nVoy a confrontarte con hechos, datos y estudios que contradicen o matizan tu posición. Mi objetivo no es hacerte cambiar de opinión — es fortalecer tu reflexión poniendo a prueba la solidez de tus argumentos frente a la realidad.\n\nVamos: retoma tu posición principal, y te respondo con hechos documentados.",
-        prompt: `FASE ACTUAL: Abogado del diablo
+        welcome: "Tus argumentos están formulados. Pasemos a la confrontación.\n\nVoy a confrontarte con hechos, datos y estudios que contradicen o matizan tu posición. Mi objetivo no es hacerte cambiar de opinión — es fortalecer tu reflexión poniendo a prueba la solidez de tus argumentos frente a la realidad.\n\nVamos: retoma tu posición principal, y te respondo con hechos documentados.",
+        prompt: `FASE ACTUAL: Confrontación
 Cambias de postura: te conviertes en un CONTRADICTOR INTELECTUAL benevolente pero riguroso. Tu rol es confrontar a la persona con HECHOS, DATOS y ARGUMENTOS CON FUENTES que contradigan o maticen su posición construida en las fases anteriores.
 
 COMPORTAMIENTO ESPERADO:
@@ -164,7 +164,7 @@ REGLAS DE LA SIMULACIÓN:
         tip: 'El objetivo no es tener razón sino ser escuchado.'
       },
       5: {
-        title: 'Fase 5 — Abogado del diablo',
+        title: 'Fase 5 — Confrontación',
         why: 'Poner a prueba tus argumentos frente a hechos y datos contradictorios.',
         benefit: 'Convicciones más sólidas, conscientes de sus límites.',
         tip: 'Cambiar de opinión frente a los hechos no es una debilidad — es lucidez.'

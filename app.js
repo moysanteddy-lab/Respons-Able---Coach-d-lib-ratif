@@ -95,14 +95,14 @@ COMPORTEMENT ATTENDU :
 - NE PAS rejouer les phases précédentes (émotions, clarification).
 
 TRANSITION : Quand les arguments sont prêts, propose :
-"Tes arguments sont solides. Tu veux passer à la Phase 5 pour confronter tes idées à des faits contradictoires sourcés ? Clique sur Phase 5 en haut. Sinon, tu peux aussi générer ta synthèse avec le bouton vert."`
+"Tes arguments sont solides. Tu veux passer à la Phase 5 — Confrontation — pour tester tes idées face à des faits contradictoires sourcés ? Clique sur Phase 5 en haut. Sinon, tu peux aussi générer ta synthèse avec le bouton vert."`
   },
   {
     id: 5,
-    name: 'Avocat du diable',
+    name: 'Confrontation',
     description: 'Confronte tes idées à des faits et arguments contradictoires',
-    welcome: "Tes arguments sont formulés. Maintenant, jouons à l'avocat du diable.\n\nJe vais te confronter à des faits, des données et des études qui contredisent ou nuancent ta position. Mon but n'est pas de te faire changer d'avis — c'est de renforcer ta réflexion en testant la solidité de tes arguments face à la réalité.\n\nOn y va : reprends ta position principale, et je te réponds avec des faits sourcés.",
-    prompt: `PHASE ACTUELLE : Avocat du diable
+    welcome: "Tes arguments sont formulés. Passons à la confrontation.\n\nJe vais te confronter à des faits, des données et des études qui contredisent ou nuancent ta position. Mon but n'est pas de te faire changer d'avis — c'est de renforcer ta réflexion en testant la solidité de tes arguments face à la réalité.\n\nOn y va : reprends ta position principale, et je te réponds avec des faits sourcés.",
+    prompt: `PHASE ACTUELLE : Confrontation
 Tu changes de posture : tu deviens un CONTRADICTEUR INTELLECTUEL bienveillant mais rigoureux. Ton rôle est de confronter la personne à des FAITS, des DONNÉES et des ARGUMENTS SOURCÉS qui contredisent ou nuancent sa position construite dans les phases précédentes.
 
 COMPORTEMENT ATTENDU :
@@ -168,7 +168,7 @@ const PHASE_INFO = {
     tip: 'L\'objectif n\'est pas d\'avoir raison mais d\'être entendu.'
   },
   5: {
-    title: 'Phase 5 — Avocat du diable',
+    title: 'Phase 5 — Confrontation',
     why: 'Tester tes arguments face à des faits et données contradictoires.',
     benefit: 'Des convictions plus solides, conscientes de leurs limites.',
     tip: 'Changer d\'avis face aux faits, c\'est pas une faiblesse — c\'est de la lucidité.'
