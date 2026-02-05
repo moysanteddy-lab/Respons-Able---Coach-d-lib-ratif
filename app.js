@@ -380,6 +380,7 @@ const state = {
   currentPhase: 1,
   visitedPhases: new Set([1]),
   chatHistory: [],
+  phaseSummaries: {},
   loading: false,
   currentView: 'coach',
   lang: 'fr'
@@ -463,6 +464,7 @@ function saveSession() {
       currentPhase: state.currentPhase,
       visitedPhases: [...state.visitedPhases],
       chatHistory: state.chatHistory,
+      phaseSummaries: state.phaseSummaries,
       lang: state.lang,
       timestamp: Date.now()
     };
@@ -494,6 +496,7 @@ function clearSession() {
   state.currentPhase = 1;
   state.visitedPhases = new Set([1]);
   state.chatHistory = [];
+  state.phaseSummaries = {};
   document.getElementById('chat').innerHTML = '';
   updatePhaseButtons();
   updatePhaseInfo();
@@ -516,6 +519,19 @@ function getTopicContext() {
   if (userMessages.length === 0) return '';
   // Concaténation tronquée pour pas surcharger le prompt
   return userMessages.join(' | ').substring(0, 500);
+}
+
+// ----- Mémoire des phases précédentes -----
+
+function getPhaseMemory() {
+  const entries = Object.entries(state.phaseSummaries);
+  if (entries.length === 0) return '';
+  const phaseNames = { 1: 'Expression libre', 2: 'Exploration', 3: 'Clarification', 4: 'Formulation', 5: 'Confrontation', 6: 'Simulation' };
+  const memories = entries
+    .sort(([a], [b]) => a - b)
+    .map(([id, summary]) => `[Phase ${id} — ${phaseNames[id]}] ${summary}`)
+    .join('\n\n');
+  return `\n\nMÉMOIRE DES PHASES PRÉCÉDENTES (résumé compact — réfère-toi à ces acquis naturellement) :\n${memories}`;
 }
 
 // ----- Notification sonore -----
@@ -616,8 +632,16 @@ function startRecognition() {
 
     silenceTimer = setTimeout(() => {
       if (input.value.trim()) {
+        // Couper proprement le micro avant d'envoyer
         isRecording = false;
-        if (speechRecognition) speechRecognition.stop();
+        voiceTranscript = '';
+        if (speechRecognition) {
+          speechRecognition.onend = () => {
+            micBtn.classList.remove('recording');
+            input.placeholder = getPhasePlaceholder(state.currentPhase) || t('writeMessage') || 'Écris ton message...';
+          };
+          speechRecognition.stop();
+        }
         sendMessage();
       }
     }, SILENCE_DELAY);
@@ -639,7 +663,7 @@ function startRecognition() {
   };
 
   speechRecognition.onend = () => {
-    if (isRecording) {
+    if (isRecording && !state.loading) {
       try { startRecognition(); } catch (e) {
         isRecording = false;
         micBtn.classList.remove('recording');
@@ -647,6 +671,8 @@ function startRecognition() {
       }
     } else {
       clearTimeout(silenceTimer);
+      isRecording = false;
+      voiceTranscript = '';
       micBtn.classList.remove('recording');
       input.placeholder = getPhasePlaceholder(state.currentPhase) || t('writeMessage') || 'Écris ton message...';
     }
@@ -681,6 +707,7 @@ function init() {
     state.currentPhase = saved.currentPhase;
     state.visitedPhases = new Set(saved.visitedPhases);
     state.chatHistory = saved.chatHistory;
+    state.phaseSummaries = saved.phaseSummaries || {};
     updatePhaseButtons();
     updatePhaseInfo();
     restoreChat(saved.chatHistory);
@@ -811,8 +838,61 @@ function updatePhaseInfo() {
   }
 }
 
-function switchPhase(phaseId) {
+async function switchPhase(phaseId) {
   if (phaseId === state.currentPhase || state.loading) return;
+  const oldPhaseId = state.currentPhase;
+
+  // Générer auto-synthèse de la phase qu'on quitte (via API)
+  if (!state.phaseSummaries[oldPhaseId] && state.chatHistory.length >= 4) {
+    state.loading = true;
+    document.getElementById('send-btn').disabled = true;
+    showTyping();
+
+    try {
+      const summaryPrompt = `Résume en 3-4 phrases ce que cette personne a exprimé, ressenti ou découvert pendant cette phase de coaching civique. Sois fidèle à ses mots. Concis et direct. Pas de liste à puces, un paragraphe fluide.`;
+      const recentHistory = state.chatHistory.slice(-20);
+      const messages = [
+        { role: 'system', content: summaryPrompt },
+        ...recentHistory,
+        { role: 'user', content: 'Résumé de cette phase.' }
+      ];
+
+      const response = await fetch(WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages })
+      });
+
+      hideTyping();
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.reply) {
+          state.phaseSummaries[oldPhaseId] = data.reply.substring(0, 800);
+          const phaseNames = { 1: 'Expression libre', 2: 'Exploration', 3: 'Clarification', 4: 'Formulation', 5: 'Confrontation', 6: 'Simulation' };
+          addSystemMessage(`Acquis Phase ${oldPhaseId} (${phaseNames[oldPhaseId]}) : ${data.reply}`);
+        }
+      } else {
+        hideTyping();
+        // Fallback : dernier message coach
+        const lastCoachMsg = [...state.chatHistory].reverse().find(m => m.role === 'assistant');
+        if (lastCoachMsg) {
+          state.phaseSummaries[oldPhaseId] = lastCoachMsg.content.substring(0, 600);
+        }
+      }
+    } catch (e) {
+      hideTyping();
+      // Fallback : dernier message coach
+      const lastCoachMsg = [...state.chatHistory].reverse().find(m => m.role === 'assistant');
+      if (lastCoachMsg) {
+        state.phaseSummaries[oldPhaseId] = lastCoachMsg.content.substring(0, 600);
+      }
+    } finally {
+      state.loading = false;
+      document.getElementById('send-btn').disabled = false;
+    }
+  }
+
   state.currentPhase = phaseId;
   state.visitedPhases.add(phaseId);
   const phase = getPhase(phaseId);
@@ -1002,9 +1082,10 @@ async function sendMessage() {
     const contextLabel = getLang() === 'es'
       ? `\n\nCONTEXTO: La persona ha abordado los siguientes temas al inicio de la conversación: ${topicContext}. Haz referencia a ellos de forma natural cuando sea pertinente.`
       : `\n\nCONTEXTE : La personne a abordé les sujets suivants en début de conversation : ${topicContext}. Fais-y référence naturellement quand c'est pertinent.`;
-    const systemContent = getBasePrompt() + phase.prompt + (topicContext ? contextLabel : '');
+    const phaseMemory = getPhaseMemory();
+    const systemContent = getBasePrompt() + phase.prompt + phaseMemory + (topicContext ? contextLabel : '');
     // Tronquer l'historique envoyé à l'API pour éviter les dépassements de tokens
-    const MAX_API_MESSAGES = 60;
+    const MAX_API_MESSAGES = 30;
     const recentHistory = state.chatHistory.length > MAX_API_MESSAGES
       ? state.chatHistory.slice(-MAX_API_MESSAGES)
       : state.chatHistory;
@@ -1016,14 +1097,42 @@ async function sendMessage() {
     const payload = { messages };
     if (state.currentPhase === 5) payload.search = true;
 
-    const response = await fetch(WORKER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    // Envoi avec retry automatique sur rate limit (max 2 tentatives)
+    let response;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      response = await fetch(WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      // Si rate limit, on attend et on réessaie
+      if (response.status === 502) {
+        const errData = await response.clone().json().catch(() => ({}));
+        if (errData.code === 'RATE_LIMIT' && attempt < 2) {
+          await new Promise(r => setTimeout(r, (attempt + 1) * 4000));
+          continue;
+        }
+      }
+      break;
+    }
 
     hideTyping();
-    if (!response.ok) throw new Error(`Erreur ${response.status}`);
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      const errorCode = errData.code || '';
+      let errorMsg;
+      if (errorCode === 'RATE_LIMIT') {
+        errorMsg = "L'API a atteint sa limite de requêtes. Attends quelques secondes et réessaie.";
+      } else if (errorCode === 'PAYLOAD_TOO_LARGE') {
+        errorMsg = "La conversation est trop longue pour l'API. Démarre une nouvelle session.";
+      } else if (errorCode === 'API_KEY_INVALID') {
+        errorMsg = "Problème d'authentification API. Vérifie la clé Gemini dans le Worker.";
+      } else {
+        errorMsg = `Erreur serveur (${response.status}). Réessaie dans un instant.`;
+      }
+      throw new Error(errorMsg);
+    }
 
     const data = await response.json();
     const reply = data.reply || t('noReply') || "Hmm, je n'ai pas pu répondre. Réessaie !";
@@ -1037,7 +1146,7 @@ async function sendMessage() {
     hideTyping();
     // Remove the user message from history so retry doesn't duplicate
     state.chatHistory.pop();
-    addRetryMessage(t('connectionError') || "Problème de connexion.", text);
+    addRetryMessage(err.message || t('connectionError') || "Problème de connexion.", text);
     console.error('Erreur:', err);
   } finally {
     state.loading = false;
@@ -1110,11 +1219,12 @@ CE QUE J'AI APPRIS DE LA SIMULATION
 Résume les enseignements de la phase 6 (si elle a eu lieu).
 
 RÈGLES : Sois fidèle à ce que la personne a dit. Ne rajoute rien de ton cru. Utilise ses mots quand c'est possible. Si une phase n'a pas été abordée, indique-le simplement.`;
-  const synthPrompt = getBasePrompt() + (getSynthPrompt() || defaultSynthBody);
+  const phaseMemory = getPhaseMemory();
+  const synthPrompt = getBasePrompt() + (getSynthPrompt() || defaultSynthBody) + phaseMemory;
 
   try {
     // Garder plus de messages pour la synthèse (besoin de contexte large)
-    const MAX_SYNTH_MESSAGES = 80;
+    const MAX_SYNTH_MESSAGES = 50;
     const recentHistory = state.chatHistory.length > MAX_SYNTH_MESSAGES
       ? state.chatHistory.slice(-MAX_SYNTH_MESSAGES)
       : state.chatHistory;
@@ -1124,14 +1234,39 @@ RÈGLES : Sois fidèle à ce que la personne a dit. Ne rajoute rien de ton cru. 
       { role: 'user', content: getLang() === 'es' ? 'Genera mi síntesis completa.' : 'Génère ma synthèse complète.' }
     ];
 
-    const response = await fetch(WORKER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages })
-    });
+    // Envoi avec retry automatique sur rate limit
+    let response;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      response = await fetch(WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages })
+      });
+      if (response.status === 502) {
+        const errData = await response.clone().json().catch(() => ({}));
+        if (errData.code === 'RATE_LIMIT' && attempt < 2) {
+          await new Promise(r => setTimeout(r, (attempt + 1) * 4000));
+          continue;
+        }
+      }
+      break;
+    }
 
     hideTyping();
-    if (!response.ok) throw new Error(`Erreur ${response.status}`);
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      const errorCode = errData.code || '';
+      let errorMsg;
+      if (errorCode === 'RATE_LIMIT') {
+        errorMsg = "L'API a atteint sa limite. Attends quelques secondes et réessaie.";
+      } else if (errorCode === 'PAYLOAD_TOO_LARGE') {
+        errorMsg = "Conversation trop longue pour la synthèse. Essaie après une nouvelle session plus courte.";
+      } else {
+        errorMsg = `Erreur lors de la synthèse (${response.status}). Réessaie.`;
+      }
+      throw new Error(errorMsg);
+    }
 
     const data = await response.json();
     const reply = data.reply || t('synthError') || "Impossible de générer la synthèse. Réessaie !";
@@ -1163,8 +1298,8 @@ RÈGLES : Sois fidèle à ce que la personne a dit. Ne rajoute rien de ton cru. 
 
   } catch (err) {
     hideTyping();
-    addCoachMessage(t('synthError') || "Désolé, impossible de générer la synthèse. Vérifie ta connexion.");
-    console.error('Erreur:', err);
+    addCoachMessage(err.message || t('synthError') || "Désolé, impossible de générer la synthèse. Vérifie ta connexion.");
+    console.error('Erreur synthèse:', err);
   } finally {
     state.loading = false;
     document.getElementById('send-btn').disabled = false;
