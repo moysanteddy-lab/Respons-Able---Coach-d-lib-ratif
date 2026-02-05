@@ -901,54 +901,22 @@ async function switchPhase(phaseId) {
   if (phaseId === state.currentPhase || state.loading) return;
   const oldPhaseId = state.currentPhase;
 
-  // Générer auto-synthèse de la phase qu'on quitte (via API)
+  // Capturer la mémoire de la phase qu'on quitte (sans appel API = instantané)
   if (!state.phaseSummaries[oldPhaseId] && state.chatHistory.length >= 4) {
-    state.loading = true;
-    document.getElementById('send-btn').disabled = true;
-    showTyping();
-
-    try {
-      const summaryPrompt = `Résume en 3-4 phrases ce que cette personne a exprimé, ressenti ou découvert pendant cette phase de coaching civique. Sois fidèle à ses mots. Concis et direct. Pas de liste à puces, un paragraphe fluide.`;
-      const recentHistory = state.chatHistory.slice(-20);
-      const messages = [
-        { role: 'system', content: summaryPrompt },
-        ...recentHistory,
-        { role: 'user', content: 'Résumé de cette phase.' }
-      ];
-
-      const response = await fetch(WORKER_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages })
-      });
-
-      hideTyping();
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.reply) {
-          state.phaseSummaries[oldPhaseId] = data.reply.substring(0, 800);
-          const phaseNames = { 1: 'Expression libre', 2: 'Exploration', 3: 'Clarification', 4: 'Formulation', 5: 'Confrontation', 6: 'Simulation' };
-          addSystemMessage(`Acquis Phase ${oldPhaseId} (${phaseNames[oldPhaseId]}) : ${data.reply}`);
-        }
-      } else {
-        hideTyping();
-        // Fallback : dernier message coach
-        const lastCoachMsg = [...state.chatHistory].reverse().find(m => m.role === 'assistant');
-        if (lastCoachMsg) {
-          state.phaseSummaries[oldPhaseId] = lastCoachMsg.content.substring(0, 600);
-        }
-      }
-    } catch (e) {
-      hideTyping();
-      // Fallback : dernier message coach
-      const lastCoachMsg = [...state.chatHistory].reverse().find(m => m.role === 'assistant');
-      if (lastCoachMsg) {
-        state.phaseSummaries[oldPhaseId] = lastCoachMsg.content.substring(0, 600);
-      }
-    } finally {
-      state.loading = false;
-      document.getElementById('send-btn').disabled = false;
+    // Prendre les derniers messages user + coach pour un résumé fidèle
+    const userMessages = state.chatHistory
+      .filter(m => m.role === 'user')
+      .slice(-3)
+      .map(m => m.content.substring(0, 150))
+      .join(' | ');
+    const coachMessages = state.chatHistory
+      .filter(m => m.role === 'assistant')
+      .slice(-2)
+      .map(m => m.content.substring(0, 150))
+      .join(' | ');
+    const summary = [userMessages, coachMessages].filter(Boolean).join(' /// ');
+    if (summary) {
+      state.phaseSummaries[oldPhaseId] = summary.substring(0, 800);
     }
   }
 
