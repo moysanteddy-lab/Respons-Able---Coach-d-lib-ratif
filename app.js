@@ -253,7 +253,7 @@ TRANSITION :
     id: 6,
     name: 'Simulation',
     description: "Entraîne-toi face à un citoyen qui pense différemment",
-    welcome: "Dernière épreuve. Je deviens un citoyen qui n'est PAS d'accord avec toi. Pas un idiot — quelqu'un d'intelligent, de respectueux, mais qui voit les choses autrement.\n\nL'objectif : apprendre à rester ancré(e) face au désaccord réel.\n\nLance ta position. Je réplique.",
+    welcome: "Dernière épreuve. Je deviens un citoyen qui n'est PAS d'accord avec toi — quelqu'un de respectueux, mais qui voit les choses autrement.\n\nDouble objectif : vivre le désaccord ET construire un vrai compromis ensemble. Pas un consensus mou — un terrain d'entente solide où chacun protège ce qui est essentiel pour lui.\n\nLance ta position. Je réplique.",
     prompt: `PHASE ACTUELLE : Simulation de délibération
 Tu joues un CITOYEN OPPOSÉ — pas une caricature, un vrai humain avec des raisons légitimes de penser autrement. Tu es le sparring partner ultime.
 
@@ -341,9 +341,9 @@ const PHASE_INFO = {
   },
   6: {
     title: 'Phase 6 — Simulation',
-    why: 'S\'entraîner à garder son calme face au désaccord.',
-    benefit: 'De la confiance pour le jour J.',
-    tip: 'Écouter l\'autre ne veut pas dire être d\'accord avec lui.'
+    why: 'Vivre le désaccord ET apprendre à construire un compromis solide.',
+    benefit: 'De la confiance et un vrai savoir-faire délibératif pour le jour J.',
+    tip: 'Un bon compromis protège l\'essentiel de chacun — ce n\'est pas renoncer.'
   }
 };
 
@@ -808,8 +808,12 @@ function switchView(viewId) {
     title.textContent = t('coachTitle') || 'Coach Civique';
     subtitle.textContent = t('coachSubtitle') || 'Prépare ta voix pour la délibération';
   } else if (viewId === 'toolbox') {
-    title.textContent = t('toolboxTitle') || 'Boîte à outils';
+    title.textContent = t('toolboxTitle') || 'Boîte à outils mobilisation';
     subtitle.textContent = t('toolboxSubtitle') || 'Formes de mobilisation citoyenne';
+  } else if (viewId === 'neuro') {
+    title.textContent = t('neuroTitle') || 'Neuro Délibération';
+    subtitle.textContent = t('neuroSubtitle') || 'Techniques neuroscientifiques par phase';
+    renderNeuro();
   } else if (viewId === 'parcours') {
     title.textContent = t('parcoursTitle') || 'Mon Parcours';
     subtitle.textContent = t('parcoursSubtitle') || 'Techniques et évolution';
@@ -1369,8 +1373,8 @@ RÈGLES : Sois fidèle à ce que la personne a dit. Ne rajoute rien de ton cru. 
       });
     });
 
-    // Bouton "Aller plus loin"
-    addActionButton(t('goFurther') || 'Aller plus loin → Boîte à outils', () => switchView('toolbox'));
+    // Bouton "Voir mon parcours"
+    addActionButton(t('goFurther') || 'Voir mon parcours', () => switchView('parcours'));
 
   } catch (err) {
     hideTyping();
@@ -1904,9 +1908,15 @@ function renderParcours() {
     html += '</div>';
   }
 
-  // Section 3 : Techniques par phase
-  html += '<div class="parcours-section">';
-  html += `<h3 class="parcours-section-title">${t('parcoursTechniques') || 'Mes techniques'}</h3>`;
+  container.innerHTML = html;
+}
+
+// ----- Vue "Neuro Délibération" -----
+
+function renderNeuro() {
+  const container = document.getElementById('neuro-content');
+  let html = `<h2 class="parcours-main-title">${t('neuroTitle') || 'Neuro Délibération'}</h2>`;
+  html += `<p class="neuro-intro">${t('neuroIntro') || 'Techniques neuroscientifiques pour chaque phase de ta préparation. Prouvées par la recherche, prêtes à utiliser.'}</p>`;
 
   const phaseNames = { 2: 'Exploration', 3: 'Clarification', 4: 'Formulation', 5: 'Confrontation', 6: 'Simulation' };
 
@@ -1918,12 +1928,13 @@ function renderParcours() {
       <div class="parcours-phase-group">
         <div class="parcours-phase-label">${t('phaseLabel') || 'Phase'} ${phaseId} \u2014 ${phaseNames[phaseId]}</div>
         ${toolkit.tools.map((tool, i) => `
-          <div class="detail-section" id="parcours-tool-${phaseId}-${i}">
-            <div class="detail-section-header" onclick="document.getElementById('parcours-tool-${phaseId}-${i}').classList.toggle('open')">
+          <div class="detail-section" id="neuro-tool-${phaseId}-${i}">
+            <div class="detail-section-header" onclick="document.getElementById('neuro-tool-${phaseId}-${i}').classList.toggle('open')">
               <h4>${tool.name}</h4>
               <span class="detail-toggle">+</span>
             </div>
             <div class="detail-section-body">
+              <p class="toolkit-tool-oneliner" style="margin-bottom:8px;font-weight:600">${tool.oneliner}</p>
               <p class="toolkit-neuroscience">${tool.neuroscience}</p>
               <ol class="toolkit-steps">${tool.steps.map(s => `<li>${s}</li>`).join('')}</ol>
             </div>
@@ -1933,7 +1944,6 @@ function renderParcours() {
     `;
   }
 
-  html += '</div>';
   container.innerHTML = html;
 }
 

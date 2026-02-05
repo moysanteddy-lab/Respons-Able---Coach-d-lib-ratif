@@ -255,7 +255,7 @@ TRANSICIÓN:
         id: 6,
         name: 'Simulación',
         description: 'Entrénate frente a un ciudadano que piensa diferente',
-        welcome: "Última prueba. Me convierto en un ciudadano que NO está de acuerdo contigo. No un idiota — alguien inteligente, respetuoso, pero que ve las cosas de otra manera.\n\nEl objetivo: aprender a mantenerte firme frente al desacuerdo real.\n\nLanza tu posición. Replico.",
+        welcome: "Última prueba. Me convierto en un ciudadano que NO está de acuerdo contigo — alguien respetuoso, pero que ve las cosas de otra manera.\n\nDoble objetivo: vivir el desacuerdo Y construir un verdadero compromiso juntos. No un consenso blando — un punto de encuentro sólido donde cada uno protege lo esencial.\n\nLanza tu posición. Replico.",
         prompt: `FASE ACTUAL: Simulación de deliberación
 Interpretas a un CIUDADANO OPUESTO — no una caricatura, un humano real con razones legítimas para pensar diferente. Eres el sparring partner definitivo.
 
@@ -342,9 +342,9 @@ REGLAS:
       },
       6: {
         title: 'Fase 6 — Simulación',
-        why: 'Entrenarte a mantener la calma frente al desacuerdo.',
-        benefit: 'Confianza para el día D.',
-        tip: 'Escuchar al otro no significa estar de acuerdo con él.'
+        why: 'Vivir el desacuerdo Y aprender a construir un compromiso sólido.',
+        benefit: 'Confianza y un verdadero saber hacer deliberativo para el día D.',
+        tip: 'Un buen compromiso protege lo esencial de cada uno — no es renunciar.'
       }
     },
 
@@ -641,7 +641,7 @@ REGLAS: Sé fiel a lo que la persona dijo. No añadas nada de tu cosecha. Usa su
       needMoreChat: '¡Intercambia un poco más conmigo antes de generar tu síntesis — necesito material para hacerte un buen resumen!',
       copySynthesis: 'Copiar mi síntesis',
       copied: '¡Copiado!',
-      goFurther: 'Ir más allá → Caja de herramientas',
+      goFurther: 'Ver mi recorrido',
       synthError: 'Lo siento, imposible generar la síntesis. Verifica tu conexión.',
       retryBtn: 'Reintentar',
       phaseLabel: 'Fase',
@@ -675,8 +675,12 @@ REGLAS: Sé fiel a lo que la persona dijo. No añadas nada de tu cosecha. Usa su
       parcoursTechniques: 'Mis técnicas',
       parcoursHint: 'Completa tu recorrido y genera tu síntesis para ver tu evolución.',
       parcoursJourney: 'Mi camino',
+      // Neuro
+      neuroTitle: 'Neuro Deliberación',
+      neuroSubtitle: 'Técnicas neurocientíficas por fase',
+      neuroIntro: 'Técnicas neurocientíficas para cada fase de tu preparación. Probadas por la investigación, listas para usar.',
       // Toolbox
-      toolboxTitle: 'Caja de herramientas',
+      toolboxTitle: 'Caja de herramientas movilización',
       toolboxSubtitle: 'Formas de movilización ciudadana'
     }
   }
