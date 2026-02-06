@@ -2075,7 +2075,7 @@ function populateOnboardingText() {
   document.querySelector('[data-slide="4"] h2').textContent = isEs ? 'Técnicas validadas' : 'Des techniques validées';
   document.querySelector('[data-slide="4"] .onboarding-main').textContent = isEs
     ? 'En cada fase, herramientas basadas en neurociencias te acompañan.'
-    : 'À chaque phase, des outils issus des neurosciences t'accompagnent.';
+    : "À chaque phase, des outils issus des neurosciences t'accompagnent.";
   document.querySelector('[data-slide="4"] .onboarding-sub').textContent = isEs
     ? 'También verás "¿Sabías que?" — datos sobre cómo funciona tu cerebro en situación de debate.'
     : 'Tu verras aussi des "Le saviez-vous ?" — des insights sur le fonctionnement de ton cerveau en situation de débat.';
@@ -2090,7 +2090,7 @@ function populateOnboardingText() {
     : 'Pétitions, manifestations, désobéissance civile... Tout ce qui peut porter ta voix.';
 
   // Slide 6
-  document.querySelector('[data-slide="6"] h2').textContent = isEs ? '¡Vamos!' : 'C'est parti !';
+  document.querySelector('[data-slide="6"] h2').textContent = isEs ? '¡Vamos!' : "C'est parti !";
   document.querySelector('[data-slide="6"] .onboarding-main').textContent = isEs
     ? 'Estás listo/a para comenzar tu recorrido.'
     : 'Tu es prêt·e à commencer ton parcours.';
