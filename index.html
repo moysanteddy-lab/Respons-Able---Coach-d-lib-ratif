@@ -117,82 +117,23 @@
     </div>
   </div>
 
-  <!-- Onboarding Tutorial -->
-  <div class="onboarding-overlay" id="onboarding-overlay">
-    <div class="onboarding-modal">
-      <button class="onboarding-skip" id="onboarding-skip">Passer</button>
-
-      <!-- Slide 1: Bienvenue -->
-      <div class="onboarding-slide active" data-slide="1">
-        <div class="onboarding-icon">🎯</div>
-        <h2>Bienvenue sur Coach Civique</h2>
-        <p class="onboarding-main">Prépare ta voix pour la délibération citoyenne.</p>
-        <p class="onboarding-sub">Les techniques que tu vas découvrir ici te serviront aussi au quotidien — réunions, débats, conversations difficiles. Partout où ta parole compte.</p>
-      </div>
-
-      <!-- Slide 2: Parcours animé -->
-      <div class="onboarding-slide" data-slide="2">
-        <h2>Un parcours en 6 phases</h2>
-        <div class="onboarding-phases">
-          <div class="onboarding-phase" data-phase="1">1</div>
-          <div class="onboarding-phase" data-phase="2">2</div>
-          <div class="onboarding-phase" data-phase="3">3</div>
-          <div class="onboarding-phase" data-phase="4">4</div>
-          <div class="onboarding-phase" data-phase="5">5</div>
-          <div class="onboarding-phase" data-phase="6">6</div>
-        </div>
-        <div class="onboarding-phase-info">
-          <div class="onboarding-phase-name" id="onboarding-phase-name">Expression libre</div>
-          <div class="onboarding-phase-desc" id="onboarding-phase-desc">Exprime librement ce qui te préoccupe dans la société.</div>
-        </div>
-      </div>
-
-      <!-- Slide 3: Auto-évaluation -->
-      <div class="onboarding-slide" data-slide="3">
-        <div class="onboarding-icon">📊</div>
-        <h2>Mesure ton évolution</h2>
-        <p class="onboarding-main">Au début et à la fin de chaque session, évalue 4 compétences clés :</p>
-        <div class="onboarding-skills">
-          <span>Confiance</span><span>Clarté</span><span>Écoute</span><span>Régulation</span>
-        </div>
-        <p class="onboarding-sub">Tu pourras voir ta progression dans "Mon Parcours".</p>
-      </div>
-
-      <!-- Slide 4: Techniques Neuro -->
-      <div class="onboarding-slide" data-slide="4">
-        <div class="onboarding-icon">🧠</div>
-        <h2>Des techniques validées</h2>
-        <p class="onboarding-main">À chaque phase, des outils issus des neurosciences t'accompagnent.</p>
-        <p class="onboarding-sub">Tu verras aussi des "Le saviez-vous ?" — des insights sur le fonctionnement de ton cerveau en situation de débat.</p>
-      </div>
-
-      <!-- Slide 5: Boîte à outils -->
-      <div class="onboarding-slide" data-slide="5">
-        <div class="onboarding-icon">🛠️</div>
-        <h2>Boîte à outils mobilisation</h2>
-        <p class="onboarding-main">Au-delà du coaching, découvre les formes concrètes de mobilisation citoyenne.</p>
-        <p class="onboarding-sub">Pétitions, manifestations, désobéissance civile... Tout ce qui peut porter ta voix.</p>
-      </div>
-
-      <!-- Slide 6: C'est parti -->
-      <div class="onboarding-slide" data-slide="6">
-        <div class="onboarding-icon">🚀</div>
-        <h2>C'est parti !</h2>
-        <p class="onboarding-main">Tu es prêt·e à commencer ton parcours.</p>
-        <button class="onboarding-start" id="onboarding-start">Commencer</button>
-      </div>
-
-      <!-- Navigation -->
-      <div class="onboarding-nav">
-        <div class="onboarding-dots" id="onboarding-dots">
-          <span class="dot active" data-slide="1"></span>
-          <span class="dot" data-slide="2"></span>
-          <span class="dot" data-slide="3"></span>
-          <span class="dot" data-slide="4"></span>
-          <span class="dot" data-slide="5"></span>
-          <span class="dot" data-slide="6"></span>
-        </div>
-        <button class="onboarding-next" id="onboarding-next">Suivant</button>
+  <!-- Walkthrough Tutorial (in-page with arrows) -->
+  <div class="walkthrough-overlay" id="walkthrough-overlay"></div>
+  <div class="walkthrough-tooltip" id="walkthrough-tooltip">
+    <div class="walkthrough-arrow" id="walkthrough-arrow"></div>
+    <div class="walkthrough-content">
+      <div class="walkthrough-icon" id="walkthrough-icon"></div>
+      <h3 class="walkthrough-title" id="walkthrough-title"></h3>
+      <p class="walkthrough-text" id="walkthrough-text"></p>
+    </div>
+    <div class="walkthrough-nav">
+      <div class="walkthrough-dots" id="walkthrough-dots"></div>
+    </div>
+    <div class="walkthrough-buttons">
+      <button class="walkthrough-skip" id="walkthrough-skip">Passer</button>
+      <div class="walkthrough-buttons-right">
+        <button class="walkthrough-prev" id="walkthrough-prev">Précédent</button>
+        <button class="walkthrough-next" id="walkthrough-next">Suivant</button>
       </div>
     </div>
   </div>

@@ -549,7 +549,7 @@ function clearSession() {
   saveSession();
   updateProgress();
   showSuggestions();
-  showOnboarding();
+  showWalkthrough();
   showImpactBefore();
 }
 
@@ -736,7 +736,7 @@ function init() {
   renderPhases();
   renderToolbox();
   setupEventListeners();
-  setupOnboardingListeners();
+  setupWalkthroughListeners();
 
   const saved = loadSession();
 
@@ -771,7 +771,7 @@ function init() {
     // Nouvelle session : afficher le tutoriel si jamais vu
     const onboardingSeen = localStorage.getItem(ONBOARDING_KEY);
     if (!onboardingSeen) {
-      showOnboarding();
+      showWalkthrough();
     }
 
     updatePhaseInfo();
@@ -1267,9 +1267,9 @@ RÈGLES : Sois fidèle à ce que la personne a dit. Ne rajoute rien de ton cru. 
   // Injecter les données d'impact avant/après si disponibles
   let impactContext = '';
   if (state.impactBefore) {
-    impactContext += `\n\nAUTO-ÉVALUATION AVANT : Confiance ${state.impactBefore.confiance}/5, Clarté ${state.impactBefore.clarte}/5, Écoute ${state.impactBefore.ecoute}/5, Régulation ${state.impactBefore.regulation}/5`;
+    impactContext += `\n\nAUTO-ÉVALUATION AVANT : Confiance ${state.impactBefore.confiance}/5, Compréhension ${state.impactBefore.comprehension}/5, Formulation ${state.impactBefore.formulation}/5, Écoute ${state.impactBefore.ecoute}/5, Régulation ${state.impactBefore.regulation}/5`;
     if (state.impactAfter) {
-      impactContext += `\nAUTO-ÉVALUATION APRÈS : Confiance ${state.impactAfter.confiance}/5, Clarté ${state.impactAfter.clarte}/5, Écoute ${state.impactAfter.ecoute}/5, Régulation ${state.impactAfter.regulation}/5`;
+      impactContext += `\nAUTO-ÉVALUATION APRÈS : Confiance ${state.impactAfter.confiance}/5, Compréhension ${state.impactAfter.comprehension}/5, Formulation ${state.impactAfter.formulation}/5, Écoute ${state.impactAfter.ecoute}/5, Régulation ${state.impactAfter.regulation}/5`;
       if (state.impactAfter.freeText) {
         impactContext += `\nCE QUE LA PERSONNE RETIENT : "${state.impactAfter.freeText}"`;
       }
@@ -1646,17 +1646,22 @@ function showImpactBefore() {
     {
       key: 'confiance',
       label: isEs ? 'Confianza' : 'Confiance',
-      desc: isEs ? 'en ti mismo para expresar tu opinión' : 'en toi pour exprimer ton opinion'
+      desc: isEs ? 'para tomar la palabra' : 'pour oser prendre la parole'
     },
     {
-      key: 'clarte',
-      label: isEs ? 'Claridad' : 'Clarté',
-      desc: isEs ? 'de lo que piensas sobre este tema' : 'sur ce que tu penses de ce sujet'
+      key: 'comprehension',
+      label: isEs ? 'Comprensión' : 'Compréhension',
+      desc: isEs ? 'del tema que quieres abordar' : 'du sujet que tu veux aborder'
+    },
+    {
+      key: 'formulation',
+      label: isEs ? 'Formulación' : 'Formulation',
+      desc: isEs ? 'de tus ideas con claridad' : 'de tes idées avec clarté'
     },
     {
       key: 'ecoute',
       label: isEs ? 'Escucha' : 'Écoute',
-      desc: isEs ? 'de opiniones diferentes a las tuyas' : "des avis différents du tien"
+      desc: isEs ? 'de opiniones diferentes' : "des avis différents du tien"
     },
     {
       key: 'regulation',
@@ -1667,7 +1672,7 @@ function showImpactBefore() {
 
   card.innerHTML = `
     <div class="impact-title">${t('impactBeforeTitle') || 'Où en es-tu avant de commencer ?'}</div>
-    <div class="impact-subtitle">${t('impactBeforeSubtitle') || 'Auto-évalue ces 4 compétences (1\u00a0=\u00a0faible, 5\u00a0=\u00a0fort)'}</div>
+    <div class="impact-subtitle">${isEs ? 'Evalúa TUS 5 competencias personales (1 = débil, 5 = fuerte)' : 'Évalue TES 5 compétences personnelles (1\u00a0=\u00a0faible, 5\u00a0=\u00a0fort)'}</div>
     ${skills.map(skill => `
       <div class="impact-slider-row">
         <div class="impact-label-group">
@@ -1740,17 +1745,22 @@ function showImpactAfter() {
       {
         key: 'confiance',
         label: isEs ? 'Confianza' : 'Confiance',
-        desc: isEs ? 'en ti mismo para expresar tu opinión' : 'en toi pour exprimer ton opinion'
+        desc: isEs ? 'para tomar la palabra' : 'pour oser prendre la parole'
       },
       {
-        key: 'clarte',
-        label: isEs ? 'Claridad' : 'Clarté',
-        desc: isEs ? 'de lo que piensas sobre este tema' : 'sur ce que tu penses de ce sujet'
+        key: 'comprehension',
+        label: isEs ? 'Comprensión' : 'Compréhension',
+        desc: isEs ? 'del tema que quieres abordar' : 'du sujet que tu veux aborder'
+      },
+      {
+        key: 'formulation',
+        label: isEs ? 'Formulación' : 'Formulation',
+        desc: isEs ? 'de tus ideas con claridad' : 'de tes idées avec clarté'
       },
       {
         key: 'ecoute',
         label: isEs ? 'Escucha' : 'Écoute',
-        desc: isEs ? 'de opiniones diferentes a las tuyas' : "des avis différents du tien"
+        desc: isEs ? 'de opiniones diferentes' : "des avis différents du tien"
       },
       {
         key: 'regulation',
@@ -1761,7 +1771,7 @@ function showImpactAfter() {
 
     card.innerHTML = `
       <div class="impact-title">${t('impactAfterTitle') || 'Et maintenant, où en es-tu ?'}</div>
-      <div class="impact-subtitle">${t('impactAfterSubtitle') || 'Réévalue après ton parcours'}</div>
+      <div class="impact-subtitle">${isEs ? 'Reevalúa TUS 5 competencias personales' : 'Réévalue TES 5 compétences personnelles'}</div>
       ${skills.map(skill => `
         <div class="impact-slider-row">
           <div class="impact-label-group">
@@ -1818,11 +1828,12 @@ function showImpactAfter() {
 function renderImpactComparison(container) {
   const labels = {
     confiance: t('impactConfiance') || 'Confiance',
-    clarte: t('impactClarte') || 'Clarté',
+    comprehension: t('impactComprehension') || 'Compréhension',
+    formulation: t('impactFormulation') || 'Formulation',
     ecoute: t('impactEcoute') || 'Écoute',
     regulation: t('impactRegulation') || 'Régulation'
   };
-  const keys = ['confiance', 'clarte', 'ecoute', 'regulation'];
+  const keys = ['confiance', 'comprehension', 'formulation', 'ecoute', 'regulation'];
 
   let html = keys.map(key => {
     const before = state.impactBefore[key];
@@ -1867,11 +1878,12 @@ function renderParcours() {
 
     const labels = {
       confiance: t('impactConfiance') || 'Confiance',
-      clarte: t('impactClarte') || 'Clarté',
+      comprehension: t('impactComprehension') || 'Compréhension',
+      formulation: t('impactFormulation') || 'Formulation',
       ecoute: t('impactEcoute') || 'Écoute',
       regulation: t('impactRegulation') || 'Régulation'
     };
-    const keys = ['confiance', 'clarte', 'ecoute', 'regulation'];
+    const keys = ['confiance', 'comprehension', 'formulation', 'ecoute', 'regulation'];
 
     if (state.impactAfter) {
       html += '<div class="impact-comparison">';
@@ -2064,170 +2076,271 @@ function getPhaseDescriptions() {
   return getLang() === 'es' ? PHASE_DESCRIPTIONS_ES : PHASE_DESCRIPTIONS_FR;
 }
 
-let onboardingSlide = 1;
-let phaseAnimationInterval = null;
-let currentAnimatedPhase = 1;
+// ----- Walkthrough Tutorial (in-page) -----
 
-function showOnboarding() {
-  onboardingSlide = 1;
-  currentAnimatedPhase = 1;
-  populateOnboardingText();
-  updateOnboardingSlide();
-  document.getElementById('onboarding-overlay').classList.add('visible');
+let walkthroughStep = 0;
+let highlightedElement = null;
+
+function getWalkthroughSteps() {
+  const isEs = getLang() === 'es';
+  return [
+    {
+      target: null, // No target, centered modal for intro
+      icon: '\ud83c\udfaf',
+      title: isEs ? 'Bienvenido a Coach Civique' : 'Bienvenue sur Coach Civique',
+      text: isEs
+        ? 'Prepara tu voz para la deliberaci\u00f3n ciudadana. Las t\u00e9cnicas que vas a descubrir aqu\u00ed te servir\u00e1n tambi\u00e9n en tu d\u00eda a d\u00eda \u2014 reuniones, debates, conversaciones dif\u00edciles.'
+        : 'Pr\u00e9pare ta voix pour la d\u00e9lib\u00e9ration citoyenne. Les techniques que tu vas d\u00e9couvrir ici te serviront aussi au quotidien \u2014 r\u00e9unions, d\u00e9bats, conversations difficiles.'
+    },
+    {
+      target: '#phases-nav',
+      icon: '\ud83d\udccd',
+      title: isEs ? 'Un recorrido en 6 fases' : 'Un parcours en 6 phases',
+      text: isEs
+        ? 'Cada fase te gu\u00eda: expresi\u00f3n libre, exploraci\u00f3n emocional, clarificaci\u00f3n, formulaci\u00f3n de argumentos, confrontaci\u00f3n con los hechos, y simulaci\u00f3n de debate.'
+        : 'Chaque phase te guide : expression libre, exploration \u00e9motionnelle, clarification, formulation d\'arguments, confrontation aux faits, et simulation de d\u00e9bat.',
+      position: 'bottom'
+    },
+    {
+      target: '.impact-card',
+      fallbackTarget: '#chat',
+      icon: '\ud83d\udcca',
+      title: isEs ? 'Mide tu evoluci\u00f3n' : 'Mesure ton \u00e9volution',
+      text: isEs
+        ? 'Al inicio y al final de cada sesi\u00f3n, eval\u00faa TUS 5 competencias personales: Confianza, Comprensi\u00f3n, Formulaci\u00f3n, Escucha, Regulaci\u00f3n.'
+        : 'Au d\u00e9but et \u00e0 la fin de chaque session, \u00e9value TES 5 comp\u00e9tences personnelles : Confiance, Compr\u00e9hension, Formulation, \u00c9coute, R\u00e9gulation.',
+      position: 'top'
+    },
+    {
+      target: '#toolkit-banner',
+      fallbackTarget: '#phase-info-text',
+      icon: '\ud83e\udde0',
+      title: isEs ? 'T\u00e9cnicas validadas' : 'Des techniques valid\u00e9es',
+      text: isEs
+        ? 'En cada fase, herramientas basadas en neurociencias te acompa\u00f1an. Tambi\u00e9n ver\u00e1s "\u00bfSab\u00edas que?" con insights sobre tu cerebro en situaci\u00f3n de debate.'
+        : '\u00c0 chaque phase, des outils issus des neurosciences t\'accompagnent. Tu verras aussi des "Le saviez-vous ?" avec des insights sur ton cerveau en situation de d\u00e9bat.',
+      position: 'bottom'
+    },
+    {
+      target: '[data-view="toolbox"]',
+      icon: '\ud83d\udee0\ufe0f',
+      title: isEs ? 'Caja de herramientas' : 'Bo\u00eete \u00e0 outils mobilisation',
+      text: isEs
+        ? 'M\u00e1s all\u00e1 del coaching, descubre las formas concretas de movilizaci\u00f3n ciudadana: peticiones, manifestaciones, lobbying ciudadano...'
+        : 'Au-del\u00e0 du coaching, d\u00e9couvre les formes concr\u00e8tes de mobilisation citoyenne : p\u00e9titions, manifestations, lobbying citoyen...',
+      position: 'right'
+    },
+    {
+      target: null,
+      icon: '\ud83d\ude80',
+      title: isEs ? '\u00a1Vamos!' : "C'est parti !",
+      text: isEs
+        ? 'Est\u00e1s listo para comenzar tu recorrido.'
+        : 'Tu es pr\u00eat \u00e0 commencer ton parcours.'
+    }
+  ];
 }
 
-function populateOnboardingText() {
+function showWalkthrough() {
+  walkthroughStep = 0;
+  updateWalkthroughStep();
+}
+
+function hideWalkthrough() {
+  // Remove highlight
+  if (highlightedElement) {
+    highlightedElement.classList.remove('walkthrough-highlight');
+    highlightedElement = null;
+  }
+  // Hide overlay and tooltip
+  document.getElementById('walkthrough-overlay').classList.remove('visible');
+  document.getElementById('walkthrough-tooltip').classList.remove('visible');
+  // Save to localStorage
+  localStorage.setItem(ONBOARDING_KEY, 'true');
+}
+
+function updateWalkthroughStep() {
+  const steps = getWalkthroughSteps();
+  const step = steps[walkthroughStep];
   const isEs = getLang() === 'es';
 
-  // Skip button
-  document.getElementById('onboarding-skip').textContent = isEs ? 'Saltar' : 'Passer';
+  // Update icon
+  document.getElementById('walkthrough-icon').textContent = step.icon || '';
 
-  // Slide 1
-  document.querySelector('[data-slide="1"] h2').textContent = isEs ? 'Bienvenido a Coach Cívico' : 'Bienvenue sur Coach Civique';
-  document.querySelector('[data-slide="1"] .onboarding-main').textContent = isEs
-    ? 'Prepara tu voz para la deliberación ciudadana.'
-    : 'Prépare ta voix pour la délibération citoyenne.';
-  document.querySelector('[data-slide="1"] .onboarding-sub').textContent = isEs
-    ? 'Las técnicas que vas a descubrir aquí te servirán también en tu día a día — reuniones, debates, conversaciones difíciles. Donde sea que tu palabra importe.'
-    : 'Les techniques que tu vas découvrir ici te serviront aussi au quotidien — réunions, débats, conversations difficiles. Partout où ta parole compte.';
+  // Update content
+  document.getElementById('walkthrough-title').textContent = step.title;
+  document.getElementById('walkthrough-text').textContent = step.text;
 
-  // Slide 2
-  document.querySelector('[data-slide="2"] h2').textContent = isEs ? 'Un recorrido en 6 fases' : 'Un parcours en 6 phases';
-
-  // Slide 3
-  document.querySelector('[data-slide="3"] h2').textContent = isEs ? 'Mide tu evolución' : 'Mesure ton évolution';
-  document.querySelector('[data-slide="3"] .onboarding-main').textContent = isEs
-    ? 'Al inicio y al final de cada sesión, evalúa 4 competencias clave:'
-    : 'Au début et à la fin de chaque session, évalue 4 compétences clés :';
-  const skillsSlide = document.querySelector('[data-slide="3"] .onboarding-skills');
-  if (skillsSlide) {
-    skillsSlide.innerHTML = isEs
-      ? '<span>Confianza</span><span>Claridad</span><span>Escucha</span><span>Regulación</span>'
-      : '<span>Confiance</span><span>Clarté</span><span>Écoute</span><span>Régulation</span>';
-  }
-  document.querySelector('[data-slide="3"] .onboarding-sub').textContent = isEs
-    ? 'Podrás ver tu progreso en "Mi Recorrido".'
-    : 'Tu pourras voir ta progression dans "Mon Parcours".';
-
-  // Slide 4
-  document.querySelector('[data-slide="4"] h2').textContent = isEs ? 'Técnicas validadas' : 'Des techniques validées';
-  document.querySelector('[data-slide="4"] .onboarding-main').textContent = isEs
-    ? 'En cada fase, herramientas basadas en neurociencias te acompañan.'
-    : "À chaque phase, des outils issus des neurosciences t'accompagnent.";
-  document.querySelector('[data-slide="4"] .onboarding-sub').textContent = isEs
-    ? 'También verás "¿Sabías que?" — datos sobre cómo funciona tu cerebro en situación de debate.'
-    : 'Tu verras aussi des "Le saviez-vous ?" — des insights sur le fonctionnement de ton cerveau en situation de débat.';
-
-  // Slide 5
-  document.querySelector('[data-slide="5"] h2').textContent = isEs ? 'Caja de herramientas movilización' : 'Boîte à outils mobilisation';
-  document.querySelector('[data-slide="5"] .onboarding-main').textContent = isEs
-    ? 'Más allá del coaching, descubre las formas concretas de movilización ciudadana.'
-    : 'Au-delà du coaching, découvre les formes concrètes de mobilisation citoyenne.';
-  document.querySelector('[data-slide="5"] .onboarding-sub').textContent = isEs
-    ? 'Peticiones, manifestaciones, desobediencia civil... Todo lo que puede amplificar tu voz.'
-    : 'Pétitions, manifestations, désobéissance civile... Tout ce qui peut porter ta voix.';
-
-  // Slide 6
-  document.querySelector('[data-slide="6"] h2').textContent = isEs ? '¡Vamos!' : "C'est parti !";
-  document.querySelector('[data-slide="6"] .onboarding-main').textContent = isEs
-    ? 'Estás listo para comenzar tu recorrido.'
-    : 'Tu es prêt à commencer ton parcours.';
-  document.getElementById('onboarding-start').textContent = isEs ? 'Comenzar' : 'Commencer';
-
-  // Next button
-  document.getElementById('onboarding-next').textContent = isEs ? 'Siguiente' : 'Suivant';
-}
-
-function hideOnboarding() {
-  document.getElementById('onboarding-overlay').classList.remove('visible');
-  localStorage.setItem(ONBOARDING_KEY, 'true');
-  stopPhaseAnimation();
-}
-
-function updateOnboardingSlide() {
-  // Update slides
-  document.querySelectorAll('.onboarding-slide').forEach(slide => {
-    slide.classList.toggle('active', parseInt(slide.dataset.slide) === onboardingSlide);
-  });
   // Update dots
-  document.querySelectorAll('.onboarding-dots .dot').forEach(dot => {
-    dot.classList.toggle('active', parseInt(dot.dataset.slide) === onboardingSlide);
-  });
-  // Update next button visibility
-  const nextBtn = document.getElementById('onboarding-next');
-  nextBtn.style.display = onboardingSlide === 6 ? 'none' : 'block';
+  const dotsContainer = document.getElementById('walkthrough-dots');
+  dotsContainer.innerHTML = steps.map((_, i) =>
+    `<span class="dot${i === walkthroughStep ? ' active' : ''}" data-step="${i}"></span>`
+  ).join('');
 
-  // Start phase animation if on slide 2
-  if (onboardingSlide === 2) {
-    startPhaseAnimation();
+  // Update buttons
+  document.getElementById('walkthrough-skip').textContent = isEs ? 'Saltar' : 'Passer';
+
+  const prevBtn = document.getElementById('walkthrough-prev');
+  prevBtn.textContent = isEs ? 'Anterior' : 'Précédent';
+  prevBtn.disabled = walkthroughStep === 0;
+
+  const nextBtn = document.getElementById('walkthrough-next');
+  const isLastStep = walkthroughStep === steps.length - 1;
+  nextBtn.textContent = isLastStep ? (isEs ? 'Comenzar' : 'Commencer') : (isEs ? 'Siguiente' : 'Suivant');
+  nextBtn.classList.toggle('finish', isLastStep);
+
+  // Remove previous highlight
+  if (highlightedElement) {
+    highlightedElement.classList.remove('walkthrough-highlight');
+    highlightedElement = null;
+  }
+
+  // Show overlay
+  document.getElementById('walkthrough-overlay').classList.add('visible');
+
+  // Position tooltip
+  const tooltip = document.getElementById('walkthrough-tooltip');
+  const arrow = document.getElementById('walkthrough-arrow');
+
+  if (step.target) {
+    let targetEl = document.querySelector(step.target);
+    if (!targetEl && step.fallbackTarget) {
+      targetEl = document.querySelector(step.fallbackTarget);
+    }
+
+    if (targetEl) {
+      // Highlight target element
+      targetEl.classList.add('walkthrough-highlight');
+      highlightedElement = targetEl;
+
+      // Position tooltip near target
+      positionTooltip(targetEl, tooltip, arrow, step.position || 'bottom');
+    } else {
+      // Fallback to centered
+      centerTooltip(tooltip, arrow);
+    }
   } else {
-    stopPhaseAnimation();
+    // No target, center tooltip
+    centerTooltip(tooltip, arrow);
+  }
+
+  tooltip.classList.add('visible');
+}
+
+function positionTooltip(targetEl, tooltip, arrow, position) {
+  const targetRect = targetEl.getBoundingClientRect();
+  const tooltipRect = tooltip.getBoundingClientRect();
+  const margin = 16;
+  const arrowSize = 8;
+
+  // Reset arrow classes
+  arrow.className = 'walkthrough-arrow';
+
+  let top, left;
+
+  switch (position) {
+    case 'top':
+      top = targetRect.top - tooltipRect.height - margin - arrowSize;
+      left = targetRect.left + (targetRect.width / 2) - (tooltipRect.width / 2);
+      arrow.classList.add('arrow-bottom');
+      break;
+    case 'bottom':
+      top = targetRect.bottom + margin + arrowSize;
+      left = targetRect.left + (targetRect.width / 2) - (tooltipRect.width / 2);
+      arrow.classList.add('arrow-top');
+      break;
+    case 'left':
+      top = targetRect.top + (targetRect.height / 2) - (tooltipRect.height / 2);
+      left = targetRect.left - tooltipRect.width - margin - arrowSize;
+      arrow.classList.add('arrow-right');
+      break;
+    case 'right':
+      top = targetRect.top + (targetRect.height / 2) - (tooltipRect.height / 2);
+      left = targetRect.right + margin + arrowSize;
+      arrow.classList.add('arrow-left');
+      break;
+    default:
+      top = targetRect.bottom + margin + arrowSize;
+      left = targetRect.left + (targetRect.width / 2) - (tooltipRect.width / 2);
+      arrow.classList.add('arrow-top');
+  }
+
+  // Ensure tooltip stays within viewport
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+
+  if (left < margin) left = margin;
+  if (left + tooltipRect.width > viewportWidth - margin) left = viewportWidth - tooltipRect.width - margin;
+  if (top < margin) {
+    top = targetRect.bottom + margin + arrowSize;
+    arrow.className = 'walkthrough-arrow arrow-top';
+  }
+  if (top + tooltipRect.height > viewportHeight - margin) {
+    top = targetRect.top - tooltipRect.height - margin - arrowSize;
+    arrow.className = 'walkthrough-arrow arrow-bottom';
+  }
+
+  tooltip.style.top = `${top}px`;
+  tooltip.style.left = `${left}px`;
+}
+
+function centerTooltip(tooltip, arrow) {
+  arrow.className = 'walkthrough-arrow';
+  arrow.style.display = 'none';
+  tooltip.style.top = '50%';
+  tooltip.style.left = '50%';
+  tooltip.style.transform = 'translate(-50%, -50%)';
+}
+
+function nextWalkthroughStep() {
+  const steps = getWalkthroughSteps();
+  if (walkthroughStep < steps.length - 1) {
+    walkthroughStep++;
+    resetTooltipPosition();
+    updateWalkthroughStep();
+  } else {
+    hideWalkthrough();
   }
 }
 
-function nextOnboardingSlide() {
-  if (onboardingSlide < 6) {
-    onboardingSlide++;
-    updateOnboardingSlide();
+function prevWalkthroughStep() {
+  if (walkthroughStep > 0) {
+    walkthroughStep--;
+    resetTooltipPosition();
+    updateWalkthroughStep();
   }
 }
 
-function goToOnboardingSlide(slideNum) {
-  onboardingSlide = slideNum;
-  updateOnboardingSlide();
-}
-
-function startPhaseAnimation() {
-  currentAnimatedPhase = 1;
-  updatePhaseHighlight();
-
-  phaseAnimationInterval = setInterval(() => {
-    currentAnimatedPhase++;
-    if (currentAnimatedPhase > 6) {
-      currentAnimatedPhase = 1;
-      // Reset all to non-done state when looping
-      document.querySelectorAll('.onboarding-phase').forEach(p => p.classList.remove('done'));
-    }
-    updatePhaseHighlight();
-  }, 2500);
-}
-
-function stopPhaseAnimation() {
-  if (phaseAnimationInterval) {
-    clearInterval(phaseAnimationInterval);
-    phaseAnimationInterval = null;
+function goToWalkthroughStep(stepIndex) {
+  const steps = getWalkthroughSteps();
+  if (stepIndex >= 0 && stepIndex < steps.length) {
+    walkthroughStep = stepIndex;
+    resetTooltipPosition();
+    updateWalkthroughStep();
   }
 }
 
-function updatePhaseHighlight() {
-  const phases = document.querySelectorAll('.onboarding-phase');
-  phases.forEach(p => {
-    const phaseNum = parseInt(p.dataset.phase);
-    p.classList.remove('active');
-    if (phaseNum < currentAnimatedPhase) {
-      p.classList.add('done');
-    }
-    if (phaseNum === currentAnimatedPhase) {
-      p.classList.add('active');
-      p.classList.remove('done');
+function resetTooltipPosition() {
+  const tooltip = document.getElementById('walkthrough-tooltip');
+  tooltip.style.transform = '';
+  document.getElementById('walkthrough-arrow').style.display = '';
+}
+
+function setupWalkthroughListeners() {
+  document.getElementById('walkthrough-skip').addEventListener('click', hideWalkthrough);
+  document.getElementById('walkthrough-next').addEventListener('click', nextWalkthroughStep);
+  document.getElementById('walkthrough-prev').addEventListener('click', prevWalkthroughStep);
+
+  // Dot navigation (event delegation)
+  document.getElementById('walkthrough-dots').addEventListener('click', (e) => {
+    if (e.target.classList.contains('dot')) {
+      goToWalkthroughStep(parseInt(e.target.dataset.step));
     }
   });
 
-  // Update description
-  const desc = getPhaseDescriptions()[currentAnimatedPhase];
-  if (desc) {
-    document.getElementById('onboarding-phase-name').textContent = desc.name;
-    document.getElementById('onboarding-phase-desc').textContent = desc.desc;
-  }
-}
-
-function setupOnboardingListeners() {
-  document.getElementById('onboarding-skip').addEventListener('click', hideOnboarding);
-  document.getElementById('onboarding-start').addEventListener('click', hideOnboarding);
-  document.getElementById('onboarding-next').addEventListener('click', nextOnboardingSlide);
-
-  document.querySelectorAll('.onboarding-dots .dot').forEach(dot => {
-    dot.addEventListener('click', () => goToOnboardingSlide(parseInt(dot.dataset.slide)));
+  // Close on overlay click
+  document.getElementById('walkthrough-overlay').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) hideWalkthrough();
   });
 }
 
