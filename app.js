@@ -1641,21 +1641,40 @@ function showImpactBefore() {
   card.className = 'impact-card';
   card.id = 'impact-before-card';
 
-  const labels = [
-    t('impactConfiance') || 'Confiance',
-    t('impactClarte') || 'Clarté',
-    t('impactEcoute') || 'Écoute',
-    t('impactRegulation') || 'Régulation'
+  const isEs = getLang() === 'es';
+  const skills = [
+    {
+      key: 'confiance',
+      label: isEs ? 'Confianza' : 'Confiance',
+      desc: isEs ? 'en ti mismo para expresar tu opinión' : 'en toi pour exprimer ton opinion'
+    },
+    {
+      key: 'clarte',
+      label: isEs ? 'Claridad' : 'Clarté',
+      desc: isEs ? 'de lo que piensas sobre este tema' : 'sur ce que tu penses de ce sujet'
+    },
+    {
+      key: 'ecoute',
+      label: isEs ? 'Escucha' : 'Écoute',
+      desc: isEs ? 'de opiniones diferentes a las tuyas' : "des avis différents du tien"
+    },
+    {
+      key: 'regulation',
+      label: isEs ? 'Regulación' : 'Régulation',
+      desc: isEs ? 'de tus emociones en un debate' : 'de tes émotions en cas de désaccord'
+    }
   ];
-  const keys = ['confiance', 'clarte', 'ecoute', 'regulation'];
 
   card.innerHTML = `
     <div class="impact-title">${t('impactBeforeTitle') || 'Où en es-tu avant de commencer ?'}</div>
     <div class="impact-subtitle">${t('impactBeforeSubtitle') || 'Auto-évalue ces 4 compétences (1\u00a0=\u00a0faible, 5\u00a0=\u00a0fort)'}</div>
-    ${keys.map((key, i) => `
+    ${skills.map(skill => `
       <div class="impact-slider-row">
-        <label>${labels[i]}</label>
-        <input type="range" min="1" max="5" value="3" class="impact-range impact-untouched" data-key="${key}">
+        <div class="impact-label-group">
+          <label>${skill.label}</label>
+          <span class="impact-label-desc">${skill.desc}</span>
+        </div>
+        <input type="range" min="1" max="5" value="3" class="impact-range impact-untouched" data-key="${skill.key}">
         <span class="impact-value">?</span>
       </div>
     `).join('')}
@@ -1673,7 +1692,7 @@ function showImpactBefore() {
       range.classList.remove('impact-untouched');
       range.nextElementSibling.textContent = range.value;
       touched.add(range.dataset.key);
-      if (touched.size === keys.length) {
+      if (touched.size === skills.length) {
         submitBtn.disabled = false;
         submitBtn.classList.remove('impact-submit-disabled');
       }
@@ -1716,21 +1735,40 @@ function showImpactAfter() {
     card.className = 'impact-card';
     card.id = 'impact-after-card';
 
-    const labels = [
-      t('impactConfiance') || 'Confiance',
-      t('impactClarte') || 'Clarté',
-      t('impactEcoute') || 'Écoute',
-      t('impactRegulation') || 'Régulation'
+    const isEs = getLang() === 'es';
+    const skills = [
+      {
+        key: 'confiance',
+        label: isEs ? 'Confianza' : 'Confiance',
+        desc: isEs ? 'en ti mismo para expresar tu opinión' : 'en toi pour exprimer ton opinion'
+      },
+      {
+        key: 'clarte',
+        label: isEs ? 'Claridad' : 'Clarté',
+        desc: isEs ? 'de lo que piensas sobre este tema' : 'sur ce que tu penses de ce sujet'
+      },
+      {
+        key: 'ecoute',
+        label: isEs ? 'Escucha' : 'Écoute',
+        desc: isEs ? 'de opiniones diferentes a las tuyas' : "des avis différents du tien"
+      },
+      {
+        key: 'regulation',
+        label: isEs ? 'Regulación' : 'Régulation',
+        desc: isEs ? 'de tus emociones en un debate' : 'de tes émotions en cas de désaccord'
+      }
     ];
-    const keys = ['confiance', 'clarte', 'ecoute', 'regulation'];
 
     card.innerHTML = `
       <div class="impact-title">${t('impactAfterTitle') || 'Et maintenant, où en es-tu ?'}</div>
       <div class="impact-subtitle">${t('impactAfterSubtitle') || 'Réévalue après ton parcours'}</div>
-      ${keys.map((key, i) => `
+      ${skills.map(skill => `
         <div class="impact-slider-row">
-          <label>${labels[i]}</label>
-          <input type="range" min="1" max="5" value="3" class="impact-range impact-untouched" data-key="${key}">
+          <div class="impact-label-group">
+            <label>${skill.label}</label>
+            <span class="impact-label-desc">${skill.desc}</span>
+          </div>
+          <input type="range" min="1" max="5" value="3" class="impact-range impact-untouched" data-key="${skill.key}">
           <span class="impact-value">?</span>
         </div>
       `).join('')}
@@ -1752,7 +1790,7 @@ function showImpactAfter() {
         range.classList.remove('impact-untouched');
         range.nextElementSibling.textContent = range.value;
         afterTouched.add(range.dataset.key);
-        if (afterTouched.size === keys.length) {
+        if (afterTouched.size === skills.length) {
           afterSubmitBtn.disabled = false;
           afterSubmitBtn.classList.remove('impact-submit-disabled');
         }
@@ -2092,8 +2130,8 @@ function populateOnboardingText() {
   // Slide 6
   document.querySelector('[data-slide="6"] h2').textContent = isEs ? '¡Vamos!' : "C'est parti !";
   document.querySelector('[data-slide="6"] .onboarding-main').textContent = isEs
-    ? 'Estás listo/a para comenzar tu recorrido.'
-    : 'Tu es prêt·e à commencer ton parcours.';
+    ? 'Estás listo para comenzar tu recorrido.'
+    : 'Tu es prêt à commencer ton parcours.';
   document.getElementById('onboarding-start').textContent = isEs ? 'Comenzar' : 'Commencer';
 
   // Next button
