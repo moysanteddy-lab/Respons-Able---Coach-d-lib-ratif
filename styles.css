@@ -2086,6 +2086,11 @@ html, body {
   margin-bottom: 12px;
 }
 
+.walkthrough-icon:has(.congruence-visual) {
+  font-size: inherit;
+  margin-bottom: 8px;
+}
+
 .walkthrough-title {
   font-size: 18px;
   font-weight: 700;
@@ -2211,4 +2216,380 @@ html, body {
 
 [data-theme="dark"] .walkthrough-highlight {
   box-shadow: 0 0 0 4px var(--accent), 0 0 20px rgba(52, 211, 153, 0.4);
+}
+
+/* Congruence Circle Visual */
+.congruence-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 1rem 0;
+  position: relative;
+}
+
+/* ===== MOI - Cercle principal ===== */
+.congruence-circle-container {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  flex-shrink: 0;
+}
+
+/* Conteneur statique */
+.congruence-circle-inner {
+  position: absolute;
+  inset: 15px;
+}
+
+/* Cercle en 3 arcs (SVG) */
+.congruence-arcs {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.congruence-arcs .arc-bg {
+  fill: none;
+  stroke: var(--primary-lighter);
+  stroke-width: 6;
+  opacity: 0.3;
+}
+
+.congruence-arcs .arc-main {
+  fill: none;
+  stroke: url(#congruence-gradient);
+  stroke-width: 4;
+  stroke-linecap: round;
+  /* 3 arcs avec 3 gaps - gaps centrés à 0°, 120°, 240° */
+  stroke-dasharray: 70 24;
+  stroke-dashoffset: 82;
+  filter: drop-shadow(0 0 6px rgba(43, 94, 167, 0.5));
+}
+
+.congruence-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 7px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.8px;
+  text-align: center;
+  line-height: 1.3;
+  text-transform: uppercase;
+  z-index: 10;
+}
+
+/* Éléments (émote + label) positionnés SUR le cercle */
+.congruence-elements {
+  position: absolute;
+  inset: 0;
+}
+
+.congruence-elements .c-elem {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.congruence-elements .c-elem .emoji {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.congruence-elements .c-elem .txt {
+  font-size: 7px;
+  font-weight: 600;
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+.congruence-elements .c-elem .sub {
+  font-size: 5px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* Positions fixes sur le cercle : 0°, 120°, 240° */
+.congruence-elements .c-expr {
+  transform: translate(-50%, -50%) translateY(-40px);
+}
+
+.congruence-elements .c-cons {
+  transform: translate(-50%, -50%) rotate(120deg) translateY(-45px) rotate(-120deg) translateY(10px);
+}
+
+.congruence-elements .c-expe {
+  transform: translate(-50%, -50%) rotate(240deg) translateY(-45px) rotate(-240deg) translateY(10px);
+}
+
+/* Flèches de connexion entre éléments */
+.connection-arrows {
+  position: absolute;
+  inset: 10px;
+  pointer-events: none;
+}
+
+.connection-arrows svg {
+  width: 100%;
+  height: 100%;
+}
+
+.connection-arrows path {
+  fill: none;
+  stroke: var(--primary-light);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 2;
+  opacity: 0.6;
+}
+
+/* ===== FLÈCHE LUMINEUSE ===== */
+.flux-container {
+  width: 60px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+  margin-left: -15px; /* Chevauche le cercle pour partir du centre */
+  z-index: 5;
+}
+
+.flux-beam {
+  position: absolute;
+  height: 4px;
+  width: calc(100% - 12px);
+  left: 0;
+  background: linear-gradient(90deg,
+    var(--accent) 0%,
+    var(--accent) 100%);
+  border-radius: 4px 0 0 4px;
+  box-shadow:
+    0 0 10px var(--accent),
+    0 0 20px var(--accent),
+    0 0 30px rgba(5, 150, 105, 0.5);
+  animation: fluxPulse 2s ease-in-out infinite;
+}
+
+/* Tête de flèche */
+.flux-arrow-head {
+  position: absolute;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 14px solid var(--accent);
+  filter: drop-shadow(0 0 8px var(--accent)) drop-shadow(0 0 15px var(--accent));
+  animation: arrowPulse 2s ease-in-out infinite;
+}
+
+@keyframes arrowPulse {
+  0%, 100% { opacity: 0.85; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.flux-beam::before,
+.flux-beam::after {
+  content: '';
+  position: absolute;
+  height: 2px;
+  width: 60%;
+  background: linear-gradient(90deg,
+    var(--accent),
+    transparent);
+  border-radius: 2px;
+  left: 0;
+}
+
+.flux-beam::before {
+  top: -6px;
+  animation: fluxWave 2s ease-in-out infinite 0.3s;
+}
+
+.flux-beam::after {
+  bottom: -6px;
+  animation: fluxWave 2s ease-in-out infinite 0.6s;
+}
+
+.flux-particles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.flux-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--accent);
+  animation: particleFlow 1.5s ease-in-out infinite;
+}
+
+.flux-particle:nth-child(1) { top: 50%; left: 0; animation-delay: 0s; }
+.flux-particle:nth-child(2) { top: 25%; left: 5%; animation-delay: 0.3s; }
+.flux-particle:nth-child(3) { top: 75%; left: 5%; animation-delay: 0.6s; }
+.flux-particle:nth-child(4) { top: 50%; left: 15%; animation-delay: 0.9s; }
+
+@keyframes fluxPulse {
+  0%, 100% { opacity: 0.8; transform: scaleX(0.95); }
+  50% { opacity: 1; transform: scaleX(1.05); }
+}
+
+@keyframes fluxWave {
+  0%, 100% { opacity: 0.3; transform: scaleX(0.8); }
+  50% { opacity: 0.7; transform: scaleX(1); }
+}
+
+@keyframes particleFlow {
+  0% { transform: translateX(0) scale(1); opacity: 1; }
+  100% { transform: translateX(50px) scale(0.5); opacity: 0; }
+}
+
+/* ===== SOCIÉTÉ - Grand cercle ===== */
+.societe-container {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0;
+}
+
+.societe-boundary {
+  position: absolute;
+  inset: 0;
+  border: 3px solid var(--accent);
+  border-radius: 50%;
+  box-shadow:
+    0 0 15px rgba(5, 150, 105, 0.3),
+    inset 0 0 20px rgba(5, 150, 105, 0.1);
+}
+
+.societe-label {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent) 0%, #34d399 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Mini cercles de congruence flottants */
+.mini-congruence-container {
+  position: absolute;
+  inset: 8px;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+.mini-congruence {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  animation: floatAround 8s ease-in-out infinite;
+}
+
+.mini-congruence-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  animation: spinMini 6s linear infinite;
+}
+
+.mini-congruence-ring {
+  position: absolute;
+  inset: 3px;
+  border: 1.5px solid var(--primary-light);
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+.mini-congruence-icons {
+  position: absolute;
+  inset: 0;
+  font-size: 6px;
+  line-height: 1;
+}
+
+.mini-congruence-icons span {
+  position: absolute;
+}
+
+.mini-congruence-icons .mini-expr {
+  top: -2px;
+  left: 50%;
+  animation: spinMiniReverseCenter 6s linear infinite;
+}
+
+.mini-congruence-icons .mini-cons {
+  bottom: 1px;
+  right: -1px;
+  animation: spinMiniReverse 6s linear infinite;
+}
+
+.mini-congruence-icons .mini-expe {
+  bottom: 1px;
+  left: -1px;
+  animation: spinMiniReverse 6s linear infinite;
+}
+
+@keyframes spinMiniReverse {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes spinMiniReverseCenter {
+  from { transform: translateX(-50%) rotate(0deg); }
+  to { transform: translateX(-50%) rotate(-360deg); }
+}
+
+/* Positions et animations des mini-cercles */
+.mini-congruence:nth-child(1) { top: 10%; left: 20%; animation-delay: 0s; }
+.mini-congruence:nth-child(2) { top: 15%; right: 15%; animation-delay: -2s; }
+.mini-congruence:nth-child(3) { top: 45%; left: 10%; animation-delay: -4s; }
+.mini-congruence:nth-child(4) { top: 40%; right: 10%; animation-delay: -1s; }
+.mini-congruence:nth-child(5) { bottom: 20%; left: 25%; animation-delay: -3s; }
+.mini-congruence:nth-child(6) { bottom: 15%; right: 20%; animation-delay: -5s; }
+.mini-congruence:nth-child(7) { top: 30%; left: 35%; animation-delay: -6s; }
+
+@keyframes floatAround {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(5px, -5px); }
+  50% { transform: translate(-3px, 5px); }
+  75% { transform: translate(4px, 3px); }
+}
+
+@keyframes spinMini {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Collision : cercles dorés quand ils se touchent */
+.mini-congruence.colliding .mini-congruence-ring {
+  border-color: #fbbf24;
+  box-shadow: 0 0 8px #fbbf24, 0 0 12px rgba(251, 191, 36, 0.5);
+  opacity: 1;
+}
+
+.mini-congruence.colliding .mini-congruence-icons span {
+  filter: drop-shadow(0 0 4px #fbbf24);
 }

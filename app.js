@@ -2132,11 +2132,149 @@ function getWalkthroughSteps() {
     },
     {
       target: null,
-      icon: '\ud83d\ude80',
-      title: isEs ? '\u00a1Vamos!' : "C'est parti !",
+      icon: null,
+      customVisual: `
+        <div class="congruence-visual">
+          <!-- MOI : Cercle de congruence -->
+          <div class="congruence-circle-container">
+            <!-- Partie qui tourne (cercle + émotes + labels ensemble) -->
+            <div class="congruence-circle-inner">
+              <!-- Cercle en 3 arcs avec gradient -->
+              <svg class="congruence-arcs" viewBox="0 0 100 100">
+                <defs>
+                  <linearGradient id="congruence-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:var(--primary-light)"/>
+                    <stop offset="100%" style="stop-color:var(--primary)"/>
+                  </linearGradient>
+                </defs>
+                <circle class="arc-bg" cx="50" cy="50" r="45"/>
+                <circle class="arc-main" cx="50" cy="50" r="45" transform="rotate(-90 50 50)"/>
+              </svg>
+              <!-- Éléments (émote + label attachés) -->
+              <div class="congruence-elements">
+                <div class="c-elem c-expr">
+                  <span class="emoji">💬</span>
+                  <span class="txt">Expression</span>
+                  <span class="sub">(ce qu'on dit/fait)</span>
+                </div>
+                <div class="c-elem c-cons">
+                  <span class="emoji">🧠</span>
+                  <span class="txt">Conscience</span>
+                  <span class="sub">(ce qu'on pense)</span>
+                </div>
+                <div class="c-elem c-expe">
+                  <span class="emoji">❤️</span>
+                  <span class="txt">Expérience</span>
+                  <span class="sub">(ce qu'on ressent)</span>
+                </div>
+              </div>
+            </div>
+            <div class="congruence-center">CONGRUENCE<br>INDIVIDUELLE</div>
+          </div>
+
+          <!-- FLÈCHE lumineuse (part du centre) -->
+          <div class="flux-container">
+            <div class="flux-beam"></div>
+            <div class="flux-arrow-head"></div>
+            <div class="flux-particles">
+              <div class="flux-particle"></div>
+              <div class="flux-particle"></div>
+              <div class="flux-particle"></div>
+              <div class="flux-particle"></div>
+            </div>
+          </div>
+
+          <!-- SOCIÉTÉ : Grand cercle avec mini-congruences -->
+          <div class="societe-container">
+            <div class="societe-boundary"></div>
+            <div class="mini-congruence-container">
+              <div class="mini-congruence">
+                <div class="mini-congruence-inner">
+                  <div class="mini-congruence-ring"></div>
+                  <div class="mini-congruence-icons">
+                    <span class="mini-expr">💬</span>
+                    <span class="mini-cons">🧠</span>
+                    <span class="mini-expe">❤️</span>
+                  </div>
+                </div>
+              </div>
+              <div class="mini-congruence">
+                <div class="mini-congruence-inner">
+                  <div class="mini-congruence-ring"></div>
+                  <div class="mini-congruence-icons">
+                    <span class="mini-expr">💬</span>
+                    <span class="mini-cons">🧠</span>
+                    <span class="mini-expe">❤️</span>
+                  </div>
+                </div>
+              </div>
+              <div class="mini-congruence">
+                <div class="mini-congruence-inner">
+                  <div class="mini-congruence-ring"></div>
+                  <div class="mini-congruence-icons">
+                    <span class="mini-expr">💬</span>
+                    <span class="mini-cons">🧠</span>
+                    <span class="mini-expe">❤️</span>
+                  </div>
+                </div>
+              </div>
+              <div class="mini-congruence">
+                <div class="mini-congruence-inner">
+                  <div class="mini-congruence-ring"></div>
+                  <div class="mini-congruence-icons">
+                    <span class="mini-expr">💬</span>
+                    <span class="mini-cons">🧠</span>
+                    <span class="mini-expe">❤️</span>
+                  </div>
+                </div>
+              </div>
+              <div class="mini-congruence">
+                <div class="mini-congruence-inner">
+                  <div class="mini-congruence-ring"></div>
+                  <div class="mini-congruence-icons">
+                    <span class="mini-expr">💬</span>
+                    <span class="mini-cons">🧠</span>
+                    <span class="mini-expe">❤️</span>
+                  </div>
+                </div>
+              </div>
+              <div class="mini-congruence">
+                <div class="mini-congruence-inner">
+                  <div class="mini-congruence-ring"></div>
+                  <div class="mini-congruence-icons">
+                    <span class="mini-expr">💬</span>
+                    <span class="mini-cons">🧠</span>
+                    <span class="mini-expe">❤️</span>
+                  </div>
+                </div>
+              </div>
+              <div class="mini-congruence">
+                <div class="mini-congruence-inner">
+                  <div class="mini-congruence-ring"></div>
+                  <div class="mini-congruence-icons">
+                    <span class="mini-expr">💬</span>
+                    <span class="mini-cons">🧠</span>
+                    <span class="mini-expe">❤️</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <span class="societe-label">SOCIÉTÉ</span>
+          </div>
+        </div>
+      `,
+      title: isEs ? 'Alinéate para impactar' : 'Aligne-toi pour impacter',
       text: isEs
-        ? 'Est\u00e1s listo para comenzar tu recorrido.'
-        : 'Tu es pr\u00eat \u00e0 commencer ton parcours.'
+        ? 'Cuando lo que sientes, piensas y expresas están alineados, tu voz se vuelve auténtica y poderosa. Es esta congruencia interior y tu acción las que te permiten impactar realmente a la sociedad.'
+        : 'Quand ce que tu ressens, penses et exprimes sont alignés, ta voix devient authentique et puissante. C\'est cette congruence intérieure et ton action qui te permettent d\'impacter vraiment la société.'
+    },
+    {
+      target: null,
+      icon: '🚀',
+      title: isEs ? '¡Vamos!' : "C'est parti !",
+      text: isEs
+        ? 'Estás listo para comenzar tu recorrido.'
+        : 'Tu es prêt à commencer ton parcours.'
     }
   ];
 }
@@ -2170,8 +2308,15 @@ function updateWalkthroughStep() {
   const step = steps[walkthroughStep];
   const isEs = getLang() === 'es';
 
-  // Update icon
-  document.getElementById('walkthrough-icon').textContent = step.icon || '';
+  // Update icon or custom visual
+  const iconEl = document.getElementById('walkthrough-icon');
+  if (step.customVisual) {
+    iconEl.innerHTML = step.customVisual;
+    // Lancer détection collisions si c'est la slide congruence
+    setTimeout(initMiniCongruenceCollisions, 100);
+  } else {
+    iconEl.textContent = step.icon || '';
+  }
 
   // Update content
   document.getElementById('walkthrough-title').textContent = step.title;
@@ -2374,6 +2519,60 @@ function setupWalkthroughListeners() {
   document.getElementById('walkthrough-overlay').addEventListener('click', (e) => {
     if (e.target === e.currentTarget) hideWalkthrough();
   });
+}
+
+// ----- Détection collision mini-congruences -----
+
+let collisionAnimationId = null;
+
+function initMiniCongruenceCollisions() {
+  // Arrêter l'animation précédente si elle existe
+  if (collisionAnimationId) {
+    cancelAnimationFrame(collisionAnimationId);
+    collisionAnimationId = null;
+  }
+
+  const container = document.querySelector('.mini-congruence-container');
+  if (!container) return;
+
+  const minis = container.querySelectorAll('.mini-congruence');
+  if (minis.length < 2) return;
+
+  const collisionDistance = 25; // Distance pour collision
+
+  function checkCollisions() {
+    const positions = [];
+
+    // Récupérer les positions actuelles
+    minis.forEach(mini => {
+      const rect = mini.getBoundingClientRect();
+      positions.push({
+        el: mini,
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2
+      });
+    });
+
+    // Vérifier les collisions entre chaque paire
+    minis.forEach(mini => mini.classList.remove('colliding'));
+
+    for (let i = 0; i < positions.length; i++) {
+      for (let j = i + 1; j < positions.length; j++) {
+        const dx = positions[i].x - positions[j].x;
+        const dy = positions[i].y - positions[j].y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < collisionDistance) {
+          positions[i].el.classList.add('colliding');
+          positions[j].el.classList.add('colliding');
+        }
+      }
+    }
+
+    collisionAnimationId = requestAnimationFrame(checkCollisions);
+  }
+
+  checkCollisions();
 }
 
 // ----- Lancement -----
