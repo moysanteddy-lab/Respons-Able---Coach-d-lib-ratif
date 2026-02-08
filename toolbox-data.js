@@ -1,6 +1,6 @@
 // ============================================
 // Boite a outils -- Donnees enrichies
-// Coach Civique -- Respons'Able
+// Coach Délibératif -- Respons'Able
 // ============================================
 
 const TOOLBOX_CATEGORIES = [

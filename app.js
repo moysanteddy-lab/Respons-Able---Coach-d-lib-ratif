@@ -1,12 +1,12 @@
 // ============================================
-// Coach Civique — Respons'Able
+// Coach Délibératif — Respons'Able
 // ============================================
 
 const WORKER_URL = 'https://black-cell-5b71ted.moysan-teddy.workers.dev';
 
 // ----- System prompt de base -----
 
-const BASE_PROMPT = `Tu es un coach civique créé par Respons'Able. Tu aides les citoyens à préparer leur participation à des délibérations citoyennes (conventions citoyennes, budgets participatifs, assemblées citoyennes, etc.).
+const BASE_PROMPT = `Tu es un coach délibératif créé par Respons'Able. Tu aides les citoyens à préparer leur participation à des délibérations citoyennes (conventions citoyennes, budgets participatifs, assemblées citoyennes, etc.).
 
 PRINCIPES FONDAMENTAUX :
 - Tu es ABSOLUMENT non-directif. Tu n'as aucune opinion politique, sociale ou morale sur les sujets abordés.
@@ -477,7 +477,7 @@ function setLanguage(lang) {
 
   // Update header if on coach view
   if (state.currentView === 'coach') {
-    document.getElementById('view-title').textContent = t('coachTitle') || 'Coach Civique';
+    document.getElementById('view-title').textContent = t('coachTitle') || 'Coach Délibératif';
     document.getElementById('view-subtitle').textContent = t('coachSubtitle') || 'Prépare ta voix pour la délibération';
   }
 }
@@ -814,7 +814,7 @@ function switchView(viewId) {
   const subtitle = document.getElementById('view-subtitle');
 
   if (viewId === 'coach') {
-    title.textContent = t('coachTitle') || 'Coach Civique';
+    title.textContent = t('coachTitle') || 'Coach Délibératif';
     subtitle.textContent = t('coachSubtitle') || 'Prépare ta voix pour la délibération';
   } else if (viewId === 'toolbox') {
     title.textContent = t('toolboxTitle') || 'Boîte à outils mobilisation';
@@ -2087,7 +2087,7 @@ function getWalkthroughSteps() {
     {
       target: null, // No target, centered modal for intro
       icon: '\ud83c\udfaf',
-      title: isEs ? 'Bienvenido a Coach Civique' : 'Bienvenue sur Coach Civique',
+      title: isEs ? 'Bienvenido a Coach Délibératif' : 'Bienvenue sur Coach Délibératif',
       text: isEs
         ? 'Prepara tu voz para la deliberaci\u00f3n ciudadana. Las t\u00e9cnicas que vas a descubrir aqu\u00ed te servir\u00e1n tambi\u00e9n en tu d\u00eda a d\u00eda \u2014 reuniones, debates, conversaciones dif\u00edciles.'
         : 'Pr\u00e9pare ta voix pour la d\u00e9lib\u00e9ration citoyenne. Les techniques que tu vas d\u00e9couvrir ici te serviront aussi au quotidien \u2014 r\u00e9unions, d\u00e9bats, conversations difficiles.'
@@ -2109,7 +2109,7 @@ function getWalkthroughSteps() {
       text: isEs
         ? 'Al inicio y al final de cada sesi\u00f3n, eval\u00faa TUS 5 competencias personales: Confianza, Comprensi\u00f3n, Formulaci\u00f3n, Escucha, Regulaci\u00f3n.'
         : 'Au d\u00e9but et \u00e0 la fin de chaque session, \u00e9value TES 5 comp\u00e9tences personnelles : Confiance, Compr\u00e9hension, Formulation, \u00c9coute, R\u00e9gulation.',
-      position: 'top'
+      position: 'screen-bottom'
     },
     {
       target: '#toolkit-banner',
@@ -2119,7 +2119,7 @@ function getWalkthroughSteps() {
       text: isEs
         ? 'En cada fase, herramientas basadas en neurociencias te acompa\u00f1an. Tambi\u00e9n ver\u00e1s "\u00bfSab\u00edas que?" con insights sobre tu cerebro en situaci\u00f3n de debate.'
         : '\u00c0 chaque phase, des outils issus des neurosciences t\'accompagnent. Tu verras aussi des "Le saviez-vous ?" avec des insights sur ton cerveau en situation de d\u00e9bat.',
-      position: 'bottom'
+      position: 'screen-bottom'
     },
     {
       target: '[data-view="toolbox"]',
@@ -2155,6 +2155,12 @@ function hideWalkthrough() {
   // Hide overlay and tooltip
   document.getElementById('walkthrough-overlay').classList.remove('visible');
   document.getElementById('walkthrough-tooltip').classList.remove('visible');
+  // Fermer le menu s'il est ouvert (après slide 4)
+  document.getElementById('side-menu').classList.remove('open');
+  document.getElementById('menu-overlay').classList.remove('visible');
+  document.getElementById('menu-overlay').style.zIndex = '';
+  // Remettre le toolkit à la phase actuelle (on l'avait changé pour la slide 3)
+  renderToolkitBanner(state.currentPhase);
   // Save to localStorage
   localStorage.setItem(ONBOARDING_KEY, 'true');
 }
@@ -2195,6 +2201,26 @@ function updateWalkthroughStep() {
     highlightedElement = null;
   }
 
+  // Gestion spéciale des slides
+  const sideMenu = document.getElementById('side-menu');
+  const menuOverlay = document.getElementById('menu-overlay');
+
+  // Slide 3 (index 3) : afficher le toolkit de la phase 2 pour montrer le bandeau avec cerveau
+  if (walkthroughStep === 3) {
+    renderToolkitBanner(2); // Phase 2 a des techniques à afficher
+  }
+
+  // Slide 4 (index 4) : ouvrir le menu pour montrer le bouton toolbox
+  if (walkthroughStep === 4) {
+    sideMenu.classList.add('open');
+    menuOverlay.style.zIndex = '999'; // Sous le walkthrough overlay (1000)
+    menuOverlay.classList.add('visible');
+  } else {
+    sideMenu.classList.remove('open');
+    menuOverlay.style.zIndex = '';
+    menuOverlay.classList.remove('visible');
+  }
+
   // Show overlay
   document.getElementById('walkthrough-overlay').classList.add('visible');
 
@@ -2232,6 +2258,8 @@ function positionTooltip(targetEl, tooltip, arrow, position) {
   const tooltipRect = tooltip.getBoundingClientRect();
   const margin = 16;
   const arrowSize = 8;
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
 
   // Reset arrow classes
   arrow.className = 'walkthrough-arrow';
@@ -2247,6 +2275,12 @@ function positionTooltip(targetEl, tooltip, arrow, position) {
     case 'bottom':
       top = targetRect.bottom + margin + arrowSize;
       left = targetRect.left + (targetRect.width / 2) - (tooltipRect.width / 2);
+      arrow.classList.add('arrow-top');
+      break;
+    case 'screen-bottom':
+      // Tooltip fixé en bas de l'écran, flèche pointe vers l'élément
+      top = viewportHeight - tooltipRect.height - margin - 60; // 60px pour la barre d'input
+      left = (viewportWidth - tooltipRect.width) / 2;
       arrow.classList.add('arrow-top');
       break;
     case 'left':
@@ -2266,8 +2300,6 @@ function positionTooltip(targetEl, tooltip, arrow, position) {
   }
 
   // Ensure tooltip stays within viewport
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
 
   if (left < margin) left = margin;
   if (left + tooltipRect.width > viewportWidth - margin) left = viewportWidth - tooltipRect.width - margin;

@@ -1,10 +1,10 @@
 // ============================================
-// Coach Civique — Traductions / i18n
+// Coach Délibératif — Traductions / i18n
 // ============================================
 
 const COACH_I18N = {
   es: {
-    BASE_PROMPT: `Eres un coach cívico creado por Respons'Able. Ayudas a los ciudadanos a preparar su participación en deliberaciones ciudadanas (convenciones ciudadanas, presupuestos participativos, asambleas ciudadanas, etc.).
+    BASE_PROMPT: `Eres un coach deliberativo creado por Respons'Able. Ayudas a los ciudadanos a preparar su participación en deliberaciones ciudadanas (convenciones ciudadanas, presupuestos participativos, asambleas ciudadanas, etc.).
 
 PRINCIPIOS FUNDAMENTALES:
 - Eres ABSOLUTAMENTE no-directivo. No tienes ninguna opinión política, social ni moral sobre los temas tratados.
@@ -625,7 +625,7 @@ REGLAS: Sé fiel a lo que la persona dijo. No añadas nada de tu cosecha. Usa su
     ],
 
     UI: {
-      coachTitle: 'Coach Cívico',
+      coachTitle: 'Coach Deliberativo',
       coachSubtitle: 'Prepara tu voz para la deliberación',
       synthBtn: 'Mi síntesis',
       newSession: 'Nueva sesión',

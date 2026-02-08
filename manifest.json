@@ -1,6 +1,6 @@
 {
-  "name": "Coach Civique — Respons'Able",
-  "short_name": "Coach Civique",
+  "name": "Coach Délibératif — Respons'Able",
+  "short_name": "Coach Délibératif",
   "description": "Prépare ta voix pour la délibération citoyenne",
   "start_url": ".",
   "display": "standalone",
@@ -8,9 +8,14 @@
   "theme_color": "#1e3a5f",
   "icons": [
     {
-      "src": "favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
+      "src": "favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ]
 }
