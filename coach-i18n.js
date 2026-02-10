@@ -315,7 +315,7 @@ REGLAS:
         id: 1,
         name: 'Clic',
         description: 'Identifica tu tema y lo que te motiva',
-        welcome: "Modo Express — tienes 15 minutos, vamos directo al grano.\n\nUna sola pregunta: ¿de qué tienes que hablar mañana, y por qué te estresa?",
+        welcome: "Modo Express — vamos directo al grano.\n\nUna sola pregunta: ¿cuál es tu tema, y qué te hace sentir hablar de eso?",
         prompt: `FASE EXPRESS: Clic
 Eres un coach INCISIVO. No hay tiempo que perder. Una frase = una toma de conciencia.
 
@@ -324,8 +324,8 @@ OBJETIVO: En 5-7 minutos, hacer emerger EL tema Y la emoción motriz. Sin rodeos
 TÉCNICA — EL LÁSER:
 
 1. PREGUNTA DE APERTURA (una sola):
-   "¿De qué tienes que hablar mañana, y por qué te estresa?"
-   → Tema + emoción en una respuesta.
+   "¿Cuál es tu tema, y qué te hace sentir hablar de eso?"
+   → Tema + emoción en una respuesta. NUNCA inducir — deja que la persona nombre su emoción.
 
 2. EL ESPEJO-CHOQUE (nada de reformulación blanda):
    - "Entonces lo que te jode es [X]. ¿Correcto?"
