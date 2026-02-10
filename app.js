@@ -4,6 +4,70 @@
 
 const WORKER_URL = 'https://black-cell-5b71ted.moysan-teddy.workers.dev';
 
+// ----- Beta privée : emails autorisés -----
+// Ajoute les emails des testeurs ici (en minuscules)
+const ALLOWED_EMAILS = [
+  'moysan.teddy@gmail.com',
+  // Ajoute d'autres emails ici :
+  // 'exemple@email.com',
+];
+
+const ACCESS_KEY = 'responsable-access-email';
+
+function checkAccess() {
+  const savedEmail = localStorage.getItem(ACCESS_KEY);
+  if (savedEmail && ALLOWED_EMAILS.includes(savedEmail.toLowerCase())) {
+    return true;
+  }
+  return false;
+}
+
+function showAccessGate() {
+  const modal = document.getElementById('access-modal');
+  if (modal) modal.classList.add('active');
+}
+
+function hideAccessGate() {
+  const modal = document.getElementById('access-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+function setupAccessGate() {
+  const submitBtn = document.getElementById('access-submit-btn');
+  const emailInput = document.getElementById('access-email');
+  const status = document.getElementById('access-status');
+
+  if (!submitBtn || !emailInput) return;
+
+  const verifyAccess = () => {
+    const email = emailInput.value.trim().toLowerCase();
+
+    if (!email || !email.includes('@')) {
+      status.textContent = 'Entre une adresse email valide.';
+      status.className = 'access-status error';
+      return;
+    }
+
+    if (ALLOWED_EMAILS.includes(email)) {
+      localStorage.setItem(ACCESS_KEY, email);
+      status.textContent = 'Accès autorisé !';
+      status.className = 'access-status success';
+      setTimeout(() => {
+        hideAccessGate();
+        initApp();
+      }, 800);
+    } else {
+      status.textContent = 'Email non autorisé. Contacte Teddy pour demander l\'accès.';
+      status.className = 'access-status pending';
+    }
+  };
+
+  submitBtn.addEventListener('click', verifyAccess);
+  emailInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') verifyAccess();
+  });
+}
+
 // ----- System prompt de base -----
 
 const BASE_PROMPT = `Tu es un coach délibératif créé par Respons'Able. Tu aides les citoyens à préparer leur participation à des délibérations citoyennes (conventions citoyennes, budgets participatifs, assemblées citoyennes, etc.).
@@ -882,6 +946,17 @@ function startRecognition() {
 // ----- Init -----
 
 function init() {
+  // Vérifier l'accès beta d'abord
+  setupAccessGate();
+
+  if (checkAccess()) {
+    initApp();
+  } else {
+    showAccessGate();
+  }
+}
+
+function initApp() {
   initDarkMode();
   renderPhases();
   renderToolbox();

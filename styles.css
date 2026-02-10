@@ -1415,6 +1415,115 @@ html, body {
   color: var(--text);
 }
 
+/* ---- Access Gate Modal ---- */
+.access-modal {
+  display: none;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(8px);
+}
+
+.access-modal.active {
+  display: flex;
+}
+
+.modal.access-gate {
+  max-width: 380px;
+  padding: 0;
+  overflow: hidden;
+  text-align: center;
+}
+
+.access-header {
+  padding: 28px 24px 20px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: white;
+}
+
+.access-logo {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.access-badge {
+  display: inline-block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding: 4px 12px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 20px;
+}
+
+.access-body {
+  padding: 24px;
+}
+
+.access-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+#access-email {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 15px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+
+#access-email:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.access-btn {
+  width: 100%;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+  background: var(--primary);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.access-btn:hover {
+  background: var(--primary-light);
+}
+
+.access-status {
+  margin-top: 16px;
+  font-size: 13px;
+  min-height: 20px;
+}
+
+.access-status.success {
+  color: var(--accent);
+}
+
+.access-status.pending {
+  color: #f59e0b;
+}
+
+.access-status.error {
+  color: #ef4444;
+}
+
+.access-privacy {
+  margin-top: 20px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
 /* ---- Mode Choice Modal ---- */
 .mode-choice-modal {
   display: none;
