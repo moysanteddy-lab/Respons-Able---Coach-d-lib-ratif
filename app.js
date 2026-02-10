@@ -306,7 +306,122 @@ RÈGLES :
   }
 ];
 
+// ----- Phases EXPRESS (mode rapide ~15 min) -----
+
+const PHASES_EXPRESS = [
+  {
+    id: 1,
+    name: 'Déclic',
+    description: 'Identifie ton sujet et ce qui te motive',
+    welcome: "Mode Express — tu as 15 minutes, on va droit au but.\n\nUne seule question : tu dois parler de quoi demain, et pourquoi ça te stresse ?",
+    prompt: `PHASE EXPRESS : Déclic
+Tu es un coach INCISIF. Pas de temps à perdre. Une phrase = une prise de conscience.
+
+OBJECTIF : En 5-7 minutes, faire émerger LE sujet ET l'émotion motrice. Pas de détour.
+
+TECHNIQUE — LE LASER :
+
+1. QUESTION D'OUVERTURE (une seule) :
+   "Tu dois parler de quoi demain, et pourquoi ça te stresse ?"
+   → Sujet + émotion en une réponse.
+
+2. LE MIROIR-CHOC (pas de reformulation molle) :
+   - "Donc ce qui te fout en l'air, c'est [X]. Correct ?"
+   - "En un mot : t'es en colère, t'as peur, ou t'es blessé ?"
+   → Force le choix. Pas de "un peu des trois".
+
+3. LA QUESTION-SCALPEL (une seule, droit au but) :
+   "Pourquoi TU te bats pour ça ? Pas pourquoi c'est important en général — pourquoi TOI ?"
+   → Si réponse vague : "Plus concret. Un moment précis où t'as ressenti ça."
+
+4. LE DÉCLIC (reformulation-flash) :
+   "OK j'ai compris : tu veux [X] parce que [Y] et ça te touche parce que [Z].
+   C'est ça ton carburant. On passe aux arguments."
+
+RÈGLES :
+- MAX 2 phrases par réponse. Chaque mot compte.
+- Tu COUPES si ça part en digression : "Stop. Reviens au cœur."
+- Pas de validation excessive. Juste : "Reçu." et tu avances.
+- Tu tutoies. Tu parles cash. Tu respectes.
+
+TRANSITION (dès que le déclic est là) :
+"T'as ton carburant. Maintenant on construit tes arguments. Clique sur Phase 2."`
+  },
+  {
+    id: 2,
+    name: 'Formulation',
+    description: 'Construis tes 3 arguments prêts à l\'emploi',
+    welcome: "Parfait. Maintenant je te guide pour construire 3 arguments béton.\n\nTon argument cœur d'abord — le moment précis qui t'a fait basculer sur ce sujet. Raconte-moi ça en 2-3 phrases.",
+    prompt: `PHASE EXPRESS : Formulation guidée
+Tu es un DIRECTEUR DE DISCOURS. Tu ne poses plus de questions ouvertes — tu PROPOSES et tu affines.
+
+OBJECTIF : Sortir avec 3 arguments prêts à l'emploi en 7-10 minutes.
+
+TECHNIQUE — LE GUIDAGE ACTIF :
+
+1. PROPOSITION D'ARGUMENT VISCÉRAL :
+   "Ton argument cœur, je le vois comme ça :
+   '[Proposition basée sur ce qu'il a dit en phase 1]'
+   Ça te parle ou tu le dirais autrement ?"
+   → Tu DONNES une formulation. Il ajuste.
+
+2. PROPOSITION D'ARGUMENT LOGIQUE :
+   "Ton argument tête :
+   'Le problème c'est [fait concret]. La solution c'est [X]. Point.'
+   C'est ça ou je suis à côté ?"
+   → Si flou sur les faits : "C'est quoi LE chiffre ou LE exemple qui prouve ton point ?"
+
+3. PROPOSITION D'ARGUMENT UNIVERSEL :
+   "Et pour embarquer ceux qui s'en foutent :
+   'Ce que je propose, ça profite à tout le monde parce que [Y].'
+   Tu complètes ?"
+
+4. LA PHRASE-CLÉ (tu la rédiges pour lui) :
+   "Si je devais résumer tout ça en une phrase-choc :
+   '[Ta proposition de phrase]'
+   Tu la gardes, tu la modifies, ou tu me donnes la tienne ?"
+
+5. LE CHECK FINAL :
+   "Tes 3 arguments :
+   1. [Cœur] — pour toucher
+   2. [Tête] — pour convaincre
+   3. [Lien] — pour rassembler
+
+   Plus ta phrase-clé : '[phrase]'
+
+   T'es prêt. Tu veux qu'on simule 2 minutes d'objection ou t'as ce qu'il te faut ?"
+
+RÈGLES :
+- Tu PROPOSES d'abord, il ajuste ensuite. Pas l'inverse.
+- Formulations COURTES. Langage ORAL. Zéro jargon.
+- Si sa formulation est meilleure que la tienne : "Ah ouais, garde la tienne, elle claque."
+- Tu valides ce qui marche : "Ça c'est béton." / "Là tu tiens un truc."
+
+OPTION BONUS (s'il reste 2 min) :
+"L'objection la plus dure qu'on va te faire : [tu la formules].
+Ta réponse : [tu proposes]. Ça tient ?"
+
+FIN :
+"T'es armé. Tes 3 arguments + ta phrase-clé. Génère ta synthèse avec le bouton vert — t'auras ta fiche à garder."`
+  }
+];
+
 // ----- Infos phases (bulle "i") -----
+
+const PHASE_INFO_EXPRESS = {
+  1: {
+    title: 'Phase 1 — Déclic',
+    why: 'Identifier ton sujet et ce qui te motive en 5 minutes.',
+    benefit: 'Clarté sur ton carburant émotionnel.',
+    tip: 'Pas de détour — dis ce qui te stresse vraiment.'
+  },
+  2: {
+    title: 'Phase 2 — Formulation',
+    why: 'Construire 3 arguments prêts à l\'emploi.',
+    benefit: 'Une fiche avec tes arguments pour demain.',
+    tip: 'Le coach propose, tu ajustes. C\'est du sur-mesure express.'
+  }
+};
 
 const PHASE_INFO = {
   1: {
@@ -394,6 +509,8 @@ const state = {
   loading: false,
   currentView: 'coach',
   lang: 'fr',
+  // Mode Express vs Maîtrise
+  mode: null, // 'express' ou 'maitrise'
   // Toolkit & Nuggets
   toolkitSeenPhases: new Set(),
   shownNuggets: new Set(),
@@ -424,6 +541,10 @@ function getBasePrompt() {
 
 function getPhases() {
   const i18n = getI18n();
+  // Mode Express vs Maîtrise
+  if (state.mode === 'express') {
+    return (i18n && i18n.PHASES_EXPRESS) || PHASES_EXPRESS;
+  }
   return (i18n && i18n.PHASES) || PHASES;
 }
 
@@ -433,6 +554,10 @@ function getPhase(phaseId) {
 
 function getPhaseInfo(phaseId) {
   const i18n = getI18n();
+  // Mode Express vs Maîtrise
+  if (state.mode === 'express') {
+    return (i18n && i18n.PHASE_INFO_EXPRESS && i18n.PHASE_INFO_EXPRESS[phaseId]) || PHASE_INFO_EXPRESS[phaseId];
+  }
   return (i18n && i18n.PHASE_INFO && i18n.PHASE_INFO[phaseId]) || PHASE_INFO[phaseId];
 }
 
@@ -494,6 +619,7 @@ function saveSession() {
       chatHistory: state.chatHistory,
       phaseSummaries: state.phaseSummaries,
       lang: state.lang,
+      mode: state.mode,
       toolkitSeenPhases: [...state.toolkitSeenPhases],
       shownNuggets: [...state.shownNuggets],
       phaseMessageCounts: state.phaseMessageCounts,
@@ -532,6 +658,7 @@ function clearSession() {
   state.visitedPhases = new Set([1]);
   state.chatHistory = [];
   state.phaseSummaries = {};
+  state.mode = null;
   state.toolkitSeenPhases = new Set();
   state.shownNuggets = new Set();
   state.phaseMessageCounts = {};
@@ -541,6 +668,30 @@ function clearSession() {
   document.getElementById('chat').innerHTML = '';
   document.getElementById('toolkit-banner').innerHTML = '';
   document.getElementById('toolkit-banner').classList.remove('visible', 'expanded');
+  // Afficher le choix de mode au lieu de démarrer directement
+  showModeChoice();
+}
+
+// ----- Choix du mode Express / Maîtrise -----
+
+function showModeChoice() {
+  const modal = document.getElementById('mode-modal');
+  if (modal) {
+    modal.classList.add('active');
+  }
+}
+
+function hideModeChoice() {
+  const modal = document.getElementById('mode-modal');
+  if (modal) {
+    modal.classList.remove('active');
+  }
+}
+
+function startSession(mode) {
+  state.mode = mode;
+  hideModeChoice();
+  renderPhases();
   updatePhaseButtons();
   updatePhaseInfo();
   const phase = getPhase(1);
@@ -549,8 +700,14 @@ function clearSession() {
   saveSession();
   updateProgress();
   showSuggestions();
-  showWalkthrough();
-  showImpactBefore();
+  // Onboarding seulement en mode Maîtrise (plus long à expliquer)
+  if (mode === 'maitrise') {
+    const onboardingSeen = localStorage.getItem(ONBOARDING_KEY);
+    if (!onboardingSeen) {
+      showWalkthrough();
+    }
+    showImpactBefore();
+  }
 }
 
 // ----- Mémoire du sujet principal -----
@@ -748,8 +905,9 @@ function init() {
     if (langSelect) langSelect.value = savedLang;
   }
 
-  if (saved && saved.chatHistory.length > 0) {
-    // Restaurer la session
+  if (saved && saved.chatHistory.length > 0 && saved.mode) {
+    // Restaurer la session avec le mode
+    state.mode = saved.mode;
     state.currentPhase = saved.currentPhase;
     state.visitedPhases = new Set(saved.visitedPhases);
     state.chatHistory = saved.chatHistory;
@@ -760,6 +918,7 @@ function init() {
     state.impactBefore = saved.impactBefore || null;
     state.impactAfter = saved.impactAfter || null;
     state.impactShownBefore = saved.impactShownBefore || false;
+    renderPhases(); // Re-render avec le bon mode
     updatePhaseButtons();
     updatePhaseInfo();
     restoreChat(saved.chatHistory);
@@ -768,20 +927,23 @@ function init() {
     showSuggestions();
     renderToolkitBanner(state.currentPhase);
   } else {
-    // Nouvelle session : afficher le tutoriel si jamais vu
-    const onboardingSeen = localStorage.getItem(ONBOARDING_KEY);
-    if (!onboardingSeen) {
-      showWalkthrough();
-    }
+    // Nouvelle session : afficher le choix de mode
+    showModeChoice();
+  }
 
-    updatePhaseInfo();
-    const phase = getPhase(1);
-    addCoachMessage(phase.welcome);
-    state.chatHistory.push({ role: 'assistant', content: phase.welcome });
-    saveSession();
-    updateProgress();
-    showSuggestions();
-    showImpactBefore();
+  // Event listeners pour le modal de choix de mode
+  setupModeChoiceListeners();
+}
+
+function setupModeChoiceListeners() {
+  const expressBtn = document.getElementById('mode-express-btn');
+  const maitriseBtn = document.getElementById('mode-maitrise-btn');
+
+  if (expressBtn) {
+    expressBtn.addEventListener('click', () => startSession('express'));
+  }
+  if (maitriseBtn) {
+    maitriseBtn.addEventListener('click', () => startSession('maitrise'));
   }
 }
 
