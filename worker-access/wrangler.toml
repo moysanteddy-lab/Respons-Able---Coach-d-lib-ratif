@@ -1,0 +1,14 @@
+name = "responsable-access"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+# KV Namespace - À créer dans Cloudflare Dashboard
+# Puis remplacer l'ID ci-dessous
+[[kv_namespaces]]
+binding = "ACCESS_DB"
+id = "REMPLACER_PAR_TON_KV_ID"
+
+# Variables d'environnement (à configurer dans Cloudflare Dashboard > Workers > Settings > Variables)
+# - RESEND_API_KEY : ta clé API Resend
+# - ADMIN_EMAIL : moysan.teddy@gmail.com
+# - TOKEN_SECRET : un secret random pour sécuriser les liens

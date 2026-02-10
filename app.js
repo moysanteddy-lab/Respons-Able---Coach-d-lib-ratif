@@ -4,22 +4,15 @@
 
 const WORKER_URL = 'https://black-cell-5b71ted.moysan-teddy.workers.dev';
 
-// ----- Beta privée : emails autorisés -----
-// Ajoute les emails des testeurs ici (en minuscules)
-const ALLOWED_EMAILS = [
-  'moysan.teddy@gmail.com',
-  // Ajoute d'autres emails ici :
-  // 'exemple@email.com',
-];
-
+// ----- Beta privée : gestion accès via Worker -----
+const ACCESS_WORKER_URL = 'https://responsable-access.moysan-teddy.workers.dev';
 const ACCESS_KEY = 'responsable-access-email';
+const ACCESS_STATUS_KEY = 'responsable-access-status';
 
 function checkAccess() {
   const savedEmail = localStorage.getItem(ACCESS_KEY);
-  if (savedEmail && ALLOWED_EMAILS.includes(savedEmail.toLowerCase())) {
-    return true;
-  }
-  return false;
+  const savedStatus = localStorage.getItem(ACCESS_STATUS_KEY);
+  return savedEmail && savedStatus === 'approved';
 }
 
 function showAccessGate() {
@@ -39,7 +32,15 @@ function setupAccessGate() {
 
   if (!submitBtn || !emailInput) return;
 
-  const verifyAccess = () => {
+  // Pré-remplir si email déjà saisi
+  const savedEmail = localStorage.getItem(ACCESS_KEY);
+  if (savedEmail) {
+    emailInput.value = savedEmail;
+    // Vérifier le statut actuel
+    checkAccessStatus(savedEmail, status);
+  }
+
+  const verifyAccess = async () => {
     const email = emailInput.value.trim().toLowerCase();
 
     if (!email || !email.includes('@')) {
@@ -48,24 +49,108 @@ function setupAccessGate() {
       return;
     }
 
-    if (ALLOWED_EMAILS.includes(email)) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Vérification...';
+
+    try {
+      // D'abord vérifier si déjà autorisé
+      const checkResponse = await fetch(`${ACCESS_WORKER_URL}/check-access`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+
+      const checkData = await checkResponse.json();
+
+      if (checkData.hasAccess) {
+        localStorage.setItem(ACCESS_KEY, email);
+        localStorage.setItem(ACCESS_STATUS_KEY, 'approved');
+        status.textContent = 'Accès autorisé !';
+        status.className = 'access-status success';
+        setTimeout(() => {
+          hideAccessGate();
+          initApp();
+        }, 800);
+        return;
+      }
+
+      if (checkData.status === 'pending') {
+        localStorage.setItem(ACCESS_KEY, email);
+        localStorage.setItem(ACCESS_STATUS_KEY, 'pending');
+        status.textContent = 'Demande en attente de validation. Reviens plus tard.';
+        status.className = 'access-status pending';
+        submitBtn.textContent = 'Vérifier mon accès';
+        submitBtn.disabled = false;
+        return;
+      }
+
+      if (checkData.status === 'rejected') {
+        status.textContent = 'Accès refusé.';
+        status.className = 'access-status error';
+        submitBtn.textContent = 'Vérifier mon accès';
+        submitBtn.disabled = false;
+        return;
+      }
+
+      // Sinon, créer une nouvelle demande
+      const requestResponse = await fetch(`${ACCESS_WORKER_URL}/request-access`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+
+      const requestData = await requestResponse.json();
+
       localStorage.setItem(ACCESS_KEY, email);
-      status.textContent = 'Accès autorisé !';
-      status.className = 'access-status success';
-      setTimeout(() => {
-        hideAccessGate();
-        initApp();
-      }, 800);
-    } else {
-      status.textContent = 'Email non autorisé. Contacte Teddy pour demander l\'accès.';
+      localStorage.setItem(ACCESS_STATUS_KEY, 'pending');
+
+      status.textContent = 'Demande envoyée ! Tu recevras l\'accès après validation.';
       status.className = 'access-status pending';
+
+    } catch (error) {
+      console.error('Erreur accès:', error);
+      status.textContent = 'Erreur de connexion. Réessaie.';
+      status.className = 'access-status error';
     }
+
+    submitBtn.textContent = 'Vérifier mon accès';
+    submitBtn.disabled = false;
   };
 
   submitBtn.addEventListener('click', verifyAccess);
   emailInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') verifyAccess();
   });
+}
+
+async function checkAccessStatus(email, statusEl) {
+  try {
+    const response = await fetch(`${ACCESS_WORKER_URL}/check-access`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+
+    const data = await response.json();
+
+    if (data.hasAccess) {
+      localStorage.setItem(ACCESS_STATUS_KEY, 'approved');
+      statusEl.textContent = 'Accès autorisé !';
+      statusEl.className = 'access-status success';
+      setTimeout(() => {
+        hideAccessGate();
+        initApp();
+      }, 800);
+    } else if (data.status === 'pending') {
+      statusEl.textContent = 'Demande en attente de validation.';
+      statusEl.className = 'access-status pending';
+    } else if (data.status === 'rejected') {
+      statusEl.textContent = 'Accès refusé.';
+      statusEl.className = 'access-status error';
+    }
+  } catch (error) {
+    console.error('Erreur vérification:', error);
+  }
 }
 
 // ----- System prompt de base -----
