@@ -1524,6 +1524,29 @@ html, body {
   line-height: 1.5;
 }
 
+.access-copyright {
+  margin-top: 24px;
+  font-size: 10px;
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+.access-switch {
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.access-switch a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.access-switch a:hover {
+  text-decoration: underline;
+}
+
 /* ---- Mode Choice Modal ---- */
 .mode-choice-modal {
   display: none;

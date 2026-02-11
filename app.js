@@ -4,15 +4,15 @@
 
 const WORKER_URL = 'https://black-cell-5b71ted.moysan-teddy.workers.dev';
 
-// ----- Beta privée : gestion accès via Worker -----
+// ----- Gestion accès via Worker -----
 const ACCESS_WORKER_URL = 'https://responsable-access.moysan-teddy.workers.dev';
 const ACCESS_KEY = 'responsable-access-email';
-const ACCESS_STATUS_KEY = 'responsable-access-status';
+const ACCESS_TOKEN_KEY = 'responsable-access-token';
 
 function checkAccess() {
   const savedEmail = localStorage.getItem(ACCESS_KEY);
-  const savedStatus = localStorage.getItem(ACCESS_STATUS_KEY);
-  return savedEmail && savedStatus === 'approved';
+  const savedToken = localStorage.getItem(ACCESS_TOKEN_KEY);
+  return savedEmail && savedToken;
 }
 
 function showAccessGate() {
@@ -26,34 +26,111 @@ function hideAccessGate() {
 }
 
 function setupAccessGate() {
-  const submitBtn = document.getElementById('access-submit-btn');
-  const emailInput = document.getElementById('access-email');
-  const status = document.getElementById('access-status');
+  // Éléments login
+  const loginMode = document.getElementById('login-mode');
+  const loginEmail = document.getElementById('login-email');
+  const loginPassword = document.getElementById('login-password');
+  const loginBtn = document.getElementById('login-btn');
+  const loginStatus = document.getElementById('login-status');
+  const showRegister = document.getElementById('show-register');
 
-  if (!submitBtn || !emailInput) return;
+  // Éléments inscription
+  const registerMode = document.getElementById('register-mode');
+  const registerEmail = document.getElementById('register-email');
+  const registerBtn = document.getElementById('register-btn');
+  const registerStatus = document.getElementById('register-status');
+  const showLogin = document.getElementById('show-login');
 
-  // Pré-remplir si email déjà saisi
-  const savedEmail = localStorage.getItem(ACCESS_KEY);
-  if (savedEmail) {
-    emailInput.value = savedEmail;
-    // Vérifier le statut actuel
-    checkAccessStatus(savedEmail, status);
-  }
+  if (!loginMode || !registerMode) return;
 
-  const verifyAccess = async () => {
-    const email = emailInput.value.trim().toLowerCase();
+  // Basculer entre modes
+  showRegister.addEventListener('click', (e) => {
+    e.preventDefault();
+    loginMode.style.display = 'none';
+    registerMode.style.display = 'block';
+    loginStatus.textContent = '';
+  });
+
+  showLogin.addEventListener('click', (e) => {
+    e.preventDefault();
+    registerMode.style.display = 'none';
+    loginMode.style.display = 'block';
+    registerStatus.textContent = '';
+  });
+
+  // ----- CONNEXION -----
+  const handleLogin = async () => {
+    const email = loginEmail.value.trim().toLowerCase();
+    const password = loginPassword.value;
 
     if (!email || !email.includes('@')) {
-      status.textContent = 'Entre une adresse email valide.';
-      status.className = 'access-status error';
+      loginStatus.textContent = 'Entrez une adresse email valide.';
+      loginStatus.className = 'access-status error';
       return;
     }
 
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Vérification...';
+    if (!password) {
+      loginStatus.textContent = 'Entrez votre mot de passe.';
+      loginStatus.className = 'access-status error';
+      return;
+    }
+
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Connexion...';
 
     try {
-      // D'abord vérifier si déjà autorisé
+      const response = await fetch(`${ACCESS_WORKER_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        localStorage.setItem(ACCESS_KEY, data.email);
+        localStorage.setItem(ACCESS_TOKEN_KEY, data.token);
+        loginStatus.textContent = 'Connexion réussie !';
+        loginStatus.className = 'access-status success';
+        setTimeout(() => {
+          hideAccessGate();
+          initApp();
+        }, 800);
+        return;
+      } else {
+        loginStatus.textContent = data.error || 'Email ou mot de passe incorrect.';
+        loginStatus.className = 'access-status error';
+      }
+    } catch (error) {
+      console.error('Erreur connexion:', error);
+      loginStatus.textContent = 'Erreur de connexion. Veuillez réessayer.';
+      loginStatus.className = 'access-status error';
+    }
+
+    loginBtn.textContent = 'Se connecter';
+    loginBtn.disabled = false;
+  };
+
+  loginBtn.addEventListener('click', handleLogin);
+  loginPassword.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleLogin();
+  });
+
+  // ----- INSCRIPTION -----
+  const handleRegister = async () => {
+    const email = registerEmail.value.trim().toLowerCase();
+
+    if (!email || !email.includes('@')) {
+      registerStatus.textContent = 'Entrez une adresse email valide.';
+      registerStatus.className = 'access-status error';
+      return;
+    }
+
+    registerBtn.disabled = true;
+    registerBtn.textContent = 'Envoi...';
+
+    try {
+      // Vérifier d'abord le statut
       const checkResponse = await fetch(`${ACCESS_WORKER_URL}/check-access`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -62,37 +139,39 @@ function setupAccessGate() {
 
       const checkData = await checkResponse.json();
 
-      if (checkData.hasAccess) {
-        localStorage.setItem(ACCESS_KEY, email);
-        localStorage.setItem(ACCESS_STATUS_KEY, 'approved');
-        status.textContent = 'Accès autorisé !';
-        status.className = 'access-status success';
-        setTimeout(() => {
-          hideAccessGate();
-          initApp();
-        }, 800);
+      if (checkData.status === 'active') {
+        registerStatus.textContent = 'Ce compte existe déjà. Connectez-vous.';
+        registerStatus.className = 'access-status error';
+        registerBtn.textContent = 'Créer mon compte';
+        registerBtn.disabled = false;
+        return;
+      }
+
+      if (checkData.status === 'approved') {
+        registerStatus.textContent = 'Vérifiez vos emails pour créer votre mot de passe.';
+        registerStatus.className = 'access-status pending';
+        registerBtn.textContent = 'Créer mon compte';
+        registerBtn.disabled = false;
         return;
       }
 
       if (checkData.status === 'pending') {
-        localStorage.setItem(ACCESS_KEY, email);
-        localStorage.setItem(ACCESS_STATUS_KEY, 'pending');
-        status.textContent = 'Demande en attente de validation. Reviens plus tard.';
-        status.className = 'access-status pending';
-        submitBtn.textContent = 'Vérifier mon accès';
-        submitBtn.disabled = false;
+        registerStatus.textContent = 'Demande en attente de validation. Vous recevrez un email.';
+        registerStatus.className = 'access-status pending';
+        registerBtn.textContent = 'Créer mon compte';
+        registerBtn.disabled = false;
         return;
       }
 
       if (checkData.status === 'rejected') {
-        status.textContent = 'Accès refusé.';
-        status.className = 'access-status error';
-        submitBtn.textContent = 'Vérifier mon accès';
-        submitBtn.disabled = false;
+        registerStatus.textContent = 'Votre demande a été refusée.';
+        registerStatus.className = 'access-status error';
+        registerBtn.textContent = 'Créer mon compte';
+        registerBtn.disabled = false;
         return;
       }
 
-      // Sinon, créer une nouvelle demande
+      // Nouvelle demande
       const requestResponse = await fetch(`${ACCESS_WORKER_URL}/request-access`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -101,56 +180,23 @@ function setupAccessGate() {
 
       const requestData = await requestResponse.json();
 
-      localStorage.setItem(ACCESS_KEY, email);
-      localStorage.setItem(ACCESS_STATUS_KEY, 'pending');
-
-      status.textContent = 'Demande envoyée ! Tu recevras l\'accès après validation.';
-      status.className = 'access-status pending';
+      registerStatus.textContent = requestData.message || 'Vérifiez vos emails pour confirmer votre adresse.';
+      registerStatus.className = 'access-status success';
 
     } catch (error) {
-      console.error('Erreur accès:', error);
-      status.textContent = 'Erreur de connexion. Réessaie.';
-      status.className = 'access-status error';
+      console.error('Erreur inscription:', error);
+      registerStatus.textContent = 'Erreur de connexion. Veuillez réessayer.';
+      registerStatus.className = 'access-status error';
     }
 
-    submitBtn.textContent = 'Vérifier mon accès';
-    submitBtn.disabled = false;
+    registerBtn.textContent = 'Créer mon compte';
+    registerBtn.disabled = false;
   };
 
-  submitBtn.addEventListener('click', verifyAccess);
-  emailInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') verifyAccess();
+  registerBtn.addEventListener('click', handleRegister);
+  registerEmail.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleRegister();
   });
-}
-
-async function checkAccessStatus(email, statusEl) {
-  try {
-    const response = await fetch(`${ACCESS_WORKER_URL}/check-access`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
-    });
-
-    const data = await response.json();
-
-    if (data.hasAccess) {
-      localStorage.setItem(ACCESS_STATUS_KEY, 'approved');
-      statusEl.textContent = 'Accès autorisé !';
-      statusEl.className = 'access-status success';
-      setTimeout(() => {
-        hideAccessGate();
-        initApp();
-      }, 800);
-    } else if (data.status === 'pending') {
-      statusEl.textContent = 'Demande en attente de validation.';
-      statusEl.className = 'access-status pending';
-    } else if (data.status === 'rejected') {
-      statusEl.textContent = 'Accès refusé.';
-      statusEl.className = 'access-status error';
-    }
-  } catch (error) {
-    console.error('Erreur vérification:', error);
-  }
 }
 
 // ----- System prompt de base -----
